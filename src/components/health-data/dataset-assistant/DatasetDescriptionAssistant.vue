@@ -256,6 +256,7 @@ import PillTabs from '../common/tabs/PillTabs.vue';
 import RecursiveForm from './RecursiveForm.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
 import UtilService from '@/services/utilService';
+import { orders } from '@/utils/sortUtil'
 import {
     cloneDeepAndPrune,
     generateUniqueID,
@@ -481,6 +482,9 @@ export default {
             sample: distributionShapes,
             analytics: distributionShapes,
         });
+
+        this.sortFormInputs()
+
         this.prefixes = markRaw(prefixes);
         this.datasetAccessLevels = markRaw(datasetAccessLevels);
         this.selectedAccessLevel ??= getTypedKeys(datasetAccessLevels)[0];
@@ -543,6 +547,17 @@ export default {
             console.log(this.formData);
 
 
+        },
+        sortFormInputs() {
+            let sortedDatasetShapes: any = []
+            orders.dataset['non-public'].forEach((entry) => {
+                this.shapes.dataset.properties.forEach((shape) => {
+                    if (shape.path === entry) {
+                        sortedDatasetShapes.push(shape)
+                    }
+                })
+            })
+            this.shapes.dataset.properties = sortedDatasetShapes
         },
         capitalize,
         getLocaleText,
