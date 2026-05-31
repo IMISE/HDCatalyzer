@@ -92,7 +92,7 @@ governing permissions and limitations under the Licence.*/
             <!-- Validate button with tooltip when disabled -->
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button" data-bs-toggle="tooltip"
                 data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
-                    " :disabled="!canValidate" @click="handleValidate">
+                    " @click="handleValidate">
                 <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                     <use xlink:href="@/assets/img/ecl/icons.svg#check"></use>
                 </svg>
@@ -455,14 +455,16 @@ export default {
         };
 
         // Load the schema from the API or fallback to the local version
-        const { datasetAccessLevels, prefixes, shapes } = await this.schemaService
-            .getById('health-dcat-ap-schema')
-            .then((data) => data.payload as HealthDcatApSchema)
-            .catch((error) => {
-                console.error('Error loading schema data:', error);
-                console.warn('Falling back to local schema data.');
-                return schema.payload as HealthDcatApSchema;
-            });
+        // const { datasetAccessLevels, prefixes, shapes } = await this.schemaService
+        //     .getById('health-dcat-ap-schema')
+        //     .then((data) => data.payload as HealthDcatApSchema)
+        //     .catch((error) => {
+        //         console.error('Error loading schema data:', error);
+        //         console.warn('Falling back to local schema data.');
+        //         return schema.payload as HealthDcatApSchema;
+        //     });
+
+        const { datasetAccessLevels, prefixes, shapes } = schema.payload
 
         // Extract dataset and distribution shapes, sort their properties and map select options
         // to the correct format for the dropdowns
@@ -1209,28 +1211,41 @@ export default {
         /** Validates the current form data and saves the validation errors. */
         async handleValidate() {
             // @ts-ignore-next-line
-            const url = "https://health-data-access.acceptance.data.health.europa.eu" + '/validate-dataset';
+            const params = new URLSearchParams({ accessLevel: this.selectedAccessLevel });
+            const url = "https://health-data-access.acceptance.data.health.europa.eu" + `/validate-dataset?${params}`;
 
-            // Build the RDF in Turtle format
-            const ttl = this.supportedFormats.ttl;
-            const body = await ttl.transform(this.buildJsonLd());
+            const body = this.buildJsonLd()
+            
+            const turtle = await fetch("http://localhost:8080/jsonld-to-ttl", {
+                method: 'POST',
+                body: JSON.stringify(body)
+            })
 
+            const data = await turtle.text()
+            
             // Send the validation request
-            const { errors, warnings } = await axios
-                .post(url, body, {
-                    headers: { 'Content-Type': ttl.mime },
-                    params: { accessLevel: this.selectedAccessLevel },
-                })
-                .then((res) => {
+            const { errors, warnings } = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/turtle'
+                },
+                body: data
+            })
+                
+                .then(async (res) => {
                     // Extract errors and warnings from the validation report
-                    const errors = (res.data.reports?.error ?? []) as ITBValidationError[];
-                    const warnings = (res.data.reports?.warning ?? []) as ITBValidationError[];
+
+                    const data = await res.json()
+                    
+                    const errors = (data.reports?.error ?? []) as ITBValidationError[];
+                    const warnings = (data.reports?.warning ?? []) as ITBValidationError[];
 
                     // Display a success message if there are no errors
-                    if (res.data.result === 'SUCCESS') {
-                        this.$toast.success(this.$t('message.datasetDescriptionAssistant.validateSuccess'), {
-                            toastClassName: 'toast-success',
-                        });
+                    if (data.result === 'SUCCESS') {
+                        // TODO
+                        // this.$toast.success(this.$t('message.datasetDescriptionAssistant.validateSuccess'), {
+                        //     toastClassName: 'toast-success',
+                        // });
                         return {
                             errors: [],
                             warnings: warnings.map((warning) => ({ ...warning, id: generateUniqueID() })),
@@ -1245,10 +1260,11 @@ export default {
                 })
                 .catch((error) => {
                     console.error('Error in communication with validation service:', error);
-                    this.$toast.error(
-                        `${this.$t('message.datasetDescriptionAssistant.validateError')}\n${error.message}`,
-                        { toastClassName: 'toast-error' }
-                    );
+                    // TODO
+                    // this.$toast.error(
+                    //     `${this.$t('message.datasetDescriptionAssistant.validateError')}\n${error.message}`,
+                    //     { toastClassName: 'toast-error' }
+                    // );
                     return { errors: [], warnings: [] };
                 });
             this.validationErrors = errors;
