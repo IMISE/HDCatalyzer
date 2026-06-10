@@ -64,6 +64,16 @@ governing permissions and limitations under the Licence.*/
 
         <!-- Buttons -->
         <div class="d-flex justify-content-end mb-3">
+            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-button"
+                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                    " @click="saveTemplate">Save Template
+            </button>
+
+            <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
+                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                    " @click="loadTemplate">Load Template
+            </button>
+
             <!-- Save button with tooltip when disabled -->
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button" data-bs-toggle="tooltip"
                 data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
@@ -513,6 +523,27 @@ export default {
         },
     },
     methods: {
+        async saveTemplate() {
+            const res = await fetch("http://localhost:8080/template?templateName=test2", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.formData)
+            })
+        },
+        async loadTemplate() {
+            const res = await fetch("http://localhost:8080/template?templateName=test2", {
+                method: 'GET'
+            })
+            const data = await res.json();
+
+            this.formData = data
+
+            console.log(this.formData);
+
+
+        },
         capitalize,
         getLocaleText,
         onFormDataChanged() {
