@@ -64,14 +64,14 @@ governing permissions and limitations under the Licence.*/
 
         <!-- Buttons -->
         <div class="d-flex justify-content-end mb-3">
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-button"
+            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " @click="saveTemplate">Save Template
+                    " @click="openTemplateDialog('save')">Save Template
             </button>
 
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " @click="loadTemplate">Load Template
+                    " @click="openTemplateDialog('load')">Load Template
             </button>
 
             <!-- Save button with tooltip when disabled -->
@@ -90,6 +90,7 @@ governing permissions and limitations under the Licence.*/
             </button>
 
             <!-- Validate button with tooltip when disabled -->
+            <!-- TODO: add :disabled="!isAuthenticated" -->
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button" data-bs-toggle="tooltip"
                 data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
                     " @click="handleValidate">
@@ -119,6 +120,9 @@ governing permissions and limitations under the Licence.*/
         <e-c-confirmation-dialog ref="clearDialog" :cancelButton="'message.common.no'"
             :confirmButton="'message.common.yes'" :context="'message.datasetDescriptionAssistant.clearConfirm'"
             :title="'message.datasetDescriptionAssistant.clearTitle'" @confirm="confirmClear" />
+
+        <TemplateDialog :mode="templateDialogMode" ref="templateDialog" :cancelButton="'message.common.no'"
+            :confirmButton="'message.common.yes'" @confirm="handleTemplate" />
 
         <!-- Validation Errors -->
         <section v-if="validationErrors.length || validationWarnings.length" class="mb-3" id="validation-errors">
@@ -249,6 +253,7 @@ import Accordion from '../common/accordion/Accordion.vue';
 import AccordionItem from '../common/accordion/AccordionItem.vue';
 import DropdownSelect from './DropdownSelect.vue';
 import ECConfirmationDialog from '@/components/health-data/common/ECConfirmationDialog.vue';
+import TemplateDialog from '../common/TemplateDialog.vue';
 import ECLoadingIndicator from '../common/ECLoadingIndicator.vue';
 import ErrorNotification from '../common/notifications/ErrorNotification.vue';
 import NavTabs from '../common/tabs/NavTabs.vue';
@@ -297,6 +302,7 @@ export default {
         PillTabs,
         RecursiveForm,
         WarningNotification,
+        TemplateDialog,
     },
     head() {
         return {
@@ -426,6 +432,7 @@ export default {
             blankNodeCounter: 0, // A counter used to generate unique IDs for blank nodes
             //localDOMPurify,
             saveLocalDraftDebounced: debounce(() => this.saveLocalDraft(), 400),
+            templateDialogMode: "",
         };
     },
     async created() {
@@ -455,16 +462,16 @@ export default {
         };
 
         // Load the schema from the API or fallback to the local version
-        // const { datasetAccessLevels, prefixes, shapes } = await this.schemaService
-        //     .getById('health-dcat-ap-schema')
-        //     .then((data) => data.payload as HealthDcatApSchema)
-        //     .catch((error) => {
-        //         console.error('Error loading schema data:', error);
-        //         console.warn('Falling back to local schema data.');
-        //         return schema.payload as HealthDcatApSchema;
-        //     });
+        const { datasetAccessLevels, prefixes, shapes } = await this.schemaService
+            .getById('health-dcat-ap-schema')
+            .then((data) => data.payload as HealthDcatApSchema)
+            .catch((error) => {
+                console.error('Error loading schema data:', error);
+                console.warn('Falling back to local schema data.');
+                return schema.payload as HealthDcatApSchema;
+            });
 
-        const { datasetAccessLevels, prefixes, shapes } = schema.payload
+        //const { datasetAccessLevels, prefixes, shapes } = schema.payload
 
         // Extract dataset and distribution shapes, sort their properties and map select options
         // to the correct format for the dropdowns
@@ -529,26 +536,24 @@ export default {
         },
     },
     methods: {
-        async saveTemplate() {
-            const res = await fetch("http://localhost:8080/template?templateName=test2", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(this.formData)
-            })
-        },
-        async loadTemplate() {
-            const res = await fetch("http://localhost:8080/template?templateName=test2", {
-                method: 'GET'
-            })
-            const data = await res.json();
+        async handleTemplate(name: string) {
+            if (this.templateDialogMode === "save") {
+                const res = await fetch(`http://localhost:8080/template/${name}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.formData)
+                }) 
+            } else if (this.templateDialogMode === "load") {
+                const res = await fetch(`http://localhost:8080/template/${name}`, {
+                    method: 'GET'
+                })
+                const data = await res.json();
 
-            this.formData = data
-
-            console.log(this.formData);
-
-
+                this.formData = data
+                this.refresh()
+            }
         },
         sortFormInputs() {
             let sortedDatasetShapes: any = []
@@ -1194,14 +1199,19 @@ export default {
         handleClear() {
             (this.$refs.clearDialog as InstanceType<typeof ECConfirmationDialog>).open();
         },
+        openTemplateDialog(m: string) {
+            this.templateDialogMode = m;
+            (this.$refs.templateDialog as InstanceType<typeof TemplateDialog>).open();
+        },
         /** Clears the form data and resets the form to its initial state. */
         confirmClear() {
             this.initializeForm();
             this.refresh(); // Force a re-render to reset the form
-            this.$toast.success(this.$t('message.datasetDescriptionAssistant.clearSuccess'), {
-                toastClassName: 'toast-success',
-            });
-            if (this.isAuthenticated) this.saveForm(); // Save the cleared form
+            // TODO
+            // this.$toast.success(this.$t('message.datasetDescriptionAssistant.clearSuccess'), {
+            //     toastClassName: 'toast-success',
+            // });
+            //if (this.isAuthenticated) this.saveForm(); // Save the cleared form
         },
         /** Forces a re-render of the component by toggling the isComponentReady flag. */
         refresh() {
@@ -1215,14 +1225,14 @@ export default {
             const url = "https://health-data-access.acceptance.data.health.europa.eu" + `/validate-dataset?${params}`;
 
             const body = this.buildJsonLd()
-            
+
             const turtle = await fetch("http://localhost:8080/jsonld-to-ttl", {
                 method: 'POST',
                 body: JSON.stringify(body)
             })
 
             const data = await turtle.text()
-            
+
             // Send the validation request
             const { errors, warnings } = await fetch(url, {
                 method: 'POST',
@@ -1231,12 +1241,12 @@ export default {
                 },
                 body: data
             })
-                
+
                 .then(async (res) => {
                     // Extract errors and warnings from the validation report
 
                     const data = await res.json()
-                    
+
                     const errors = (data.reports?.error ?? []) as ITBValidationError[];
                     const warnings = (data.reports?.warning ?? []) as ITBValidationError[];
 
