@@ -103,7 +103,7 @@ export default {
         dataAccessApplicationTitles: { type: Array, required: false, default: null },
         confirmationSize: { type: String, required: false, default: null },
         contextBelow: { type: String, required: false, default: null },
-        mode: String
+        mode: String,
     },
     data() {
         return { isDropdownOpen: false, templateName: "", templates: [], modalInstance: null };

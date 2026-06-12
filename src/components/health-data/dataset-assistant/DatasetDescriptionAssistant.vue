@@ -188,7 +188,7 @@ governing permissions and limitations under the Licence.*/
                                 :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
                                 :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
                                 v-model:saved="saved"
-                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)" />
+                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)" @handleTemplateNode="handleTemplateNode" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
@@ -554,6 +554,14 @@ export default {
                 this.formData = data
                 this.refresh()
             }
+        },
+        async handleTemplateNode(template: String, path: String) {
+            const res = await fetch(`http://localhost:8080/template/${template}`, {
+                method: 'GET'
+            })
+            const data = await res.json();
+            this.formData.dataset[0][path] = data.dataset[0][path];
+            this.refresh()  
         },
         sortFormInputs() {
             let sortedDatasetShapes: any = []
