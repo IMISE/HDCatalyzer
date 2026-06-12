@@ -38,7 +38,7 @@ governing permissions and limitations under the Licence.*/
                         <span class="ecl-button__container">
                             <span class="ecl-button__label" data-ecl-label="true">{{
                                 $t('message.metadata.close')
-                                }}
+                            }}
                             </span>
                             <svg class="ecl-icon ecl-icon--s ecl-icon--rotate-180 ecl-select__icon-shape"
                                 focusable="false" aria-hidden="true">
@@ -50,25 +50,24 @@ governing permissions and limitations under the Licence.*/
                 <div class="ecl-modal__body">
                     <input v-if="mode === 'save'" class="ecl-text-input flex-grow-1" :required="true"
                         v-model="templateName" />
-                    <div class="ecl-select__container ecl-select__container--m" v-if="mode === 'load'">
-                        <select class="ecl-select" :required="required" v-model="templateName" @click="toggleDropdown()"
+                    <div v-if="mode === 'load'" class="ecl-select__container ecl-select__container--m">
+                        <select class="ecl-select" :required="true" v-model="templateName" @click="toggleDropdown()"
                             @blur="toggleDropdown()" data-ecl-auto-init="Select">
                             <option v-for="(item, index) in templates" :key="item._id + index" :value="item._id">{{
                                 item._id }}
                             </option>
                         </select>
-                        <div class="ecl-select__container ecl-select__container--m">
-                            <div class="ecl-select__icon">
-                                <button class="ecl-button ecl-button--icon-only" tabindex="-1">
-                                    <span class="ecl-button__container">
-                                        <span class="ecl-button__label" data-ecl-label="true">{{ label }}</span>
-                                        <svg :class="`ecl-icon ecl-icon--fluid ${isDropdownOpen ? '' : 'ecl-icon--rotate-180'}
+
+                        <div class="ecl-select__icon">
+                            <button class="ecl-button ecl-button--icon-only" tabindex="-1">
+                                <span class="ecl-button__container">
+                                    <span class="ecl-button__label" data-ecl-label="true">{{ label }}</span>
+                                    <svg :class="`ecl-icon ecl-icon--fluid ${isDropdownOpen ? '' : 'ecl-icon--rotate-180'}
                     ecl-button__icon ecl-button__icon--after`" focusable="false" aria-hidden="true" data-ecl-icon>
-                                            <use xlink:href="@/assets/img/ecl/icons.svg#corner-arrow"></use>
-                                        </svg>
-                                    </span>
-                                </button>
-                            </div>
+                                        <use xlink:href="@/assets/img/ecl/icons.svg#corner-arrow"></use>
+                                    </svg>
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -111,17 +110,12 @@ export default {
     },
     methods: {
         /** Initializes the modal and opens it. */
-        async open() {
+        open() {
             if (!this.modalInstance) {
                 this.modalInstance = new window.ECL.Modal(this.$el);
                 this.modalInstance.init();
             }
             this.modalInstance.openModal();
-            if (this.mode === 'load') {
-                const data = await response.json();
-                this.templates = data
-                this.isDropdownOpen = !this.isDropdownOpen;
-            }
         },
         cancel() {
             this.modalInstance?.closeModal();
