@@ -1,6 +1,6 @@
 /*Copyright (C) 2024 European Union
 
- __
+__
 
 Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
 
@@ -27,27 +27,14 @@ governing permissions and limitations under the Licence.*/
   <div class="ecl-form-group">
     <div class="row align-items-center">
       <div class="col-md-12">
-        <AlertAdditionalInfo
-          v-if="additionalInformation?.length > 0"
-          :message="$t('message.application.form.editField')"
-        />
+        <AlertAdditionalInfo v-if="additionalInformation?.length > 0"
+          :message="$t('message.application.form.editField')" />
 
-        <e-c-checkbox
-          :label="label"
-          :id="String(id)"
-          :hasError="getErrorMessage?.length > 0 && !touched"
+        <e-c-checkbox :label="label" :id="String(id)" :hasError="getErrorMessage?.length > 0 && !touched"
           :disabled="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
-          :checked="localModelValue"
-          :on-change="updateValue"
-          :required="required"
-          :help-text="tooltip"
-          class="mb-2"
-        />
+          :checked="localModelValue" :on-change="updateValue" :required="required" :help-text="tooltip" class="mb-2" />
 
-        <AdditionalInformationPerCountry
-          :id="id + '-additional-info'"
-          :values="additionalInformation ?? []"
-        />
+        <AdditionalInformationPerCountry :id="id + '-additional-info'" :values="additionalInformation ?? []" />
       </div>
     </div>
     <div :id="`${id}ErrorMessage`" v-if="getErrorMessage.length > 0 && !touched" class="ecl-feedback-message">
@@ -59,7 +46,7 @@ governing permissions and limitations under the Licence.*/
 <script lang="ts">
 import FormLabel from "@/components/health-data/application/forms/form-fields/FormLabel.vue";
 import ECCheckbox from "@/components/health-data/common/ECCheckbox.vue";
-import {ErrorFields} from "@/components/health-data/application/commonTypes";
+import type { ErrorFields } from "@/components/health-data/application/commonTypes";
 import ErrorIcon from '@/components/health-data/common/ErrorIcon.vue';
 import AdditionalInformationPerCountry
   from "@/components/health-data/application/forms/form-fields/AdditionalInformationPerCountry.vue";
@@ -69,7 +56,8 @@ import AlertAdditionalInfo
 export default {
   components: {
     AlertAdditionalInfo,
-    AdditionalInformationPerCountry, ECCheckbox, ErrorIcon, FormLabel },
+    AdditionalInformationPerCountry, ECCheckbox, ErrorIcon, FormLabel
+  },
   props: {
     id: String,
     label: String,
@@ -92,7 +80,7 @@ export default {
       type: Array,
       required: false
     },
-    enabledBasedOnParentCondition : {
+    enabledBasedOnParentCondition: {
       type: Boolean,
       required: false,
       default: false
@@ -104,8 +92,8 @@ export default {
       touched: false
     };
   },
-  computed : {
-    getErrorMessage(): string{
+  computed: {
+    getErrorMessage(): string {
       const errorMessageObject = this.errorFields.find(f => f.field === this.id);
       return errorMessageObject ? errorMessageObject.code : "";
     },

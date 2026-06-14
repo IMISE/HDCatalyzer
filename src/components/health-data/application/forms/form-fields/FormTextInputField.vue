@@ -93,7 +93,7 @@ governing permissions and limitations under the Licence.*/
 
 <script lang="ts">
 import FormLabel from '@/components/health-data/application/forms/form-fields/FormLabel.vue';
-import { ErrorFields } from '@/components/health-data/application/commonTypes';
+import type { ErrorFields } from '@/components/health-data/application/commonTypes';
 import ErrorIcon from '@/components/health-data/common/ErrorIcon.vue';
 import { getSupportedLanguagesForSelect } from '@/utils/generalUtils';
 import AdditionalInformationPerCountry

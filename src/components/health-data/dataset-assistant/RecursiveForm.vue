@@ -28,7 +28,8 @@ governing permissions and limitations under the Licence.*/
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
             <TemplateDropdownSelect class="d-flex align-items-center" id="default-language-select"
                 :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" v-model:items="templates"
-                :model-value="selectedTemplate" @update:model-value="(template) => selectTemplate(template, prop.path)" />
+                :model-value="selectedTemplate"
+                @update:model-value="(template) => selectTemplate(template, prop.path)" />
             <div v-for="(input, i) in localBucket[prop.path] ?? []"
                 :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
                 <!-- Remove entry button -->
@@ -95,11 +96,11 @@ governing permissions and limitations under the Licence.*/
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue';
+import type { PropType } from 'vue';
 import DynamicInputField from './DynamicInputField.vue';
 import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
-import { AccessLevel, AnyProperty, DataBucket, PropertyContext, ShapeInput } from './types';
+import type { AccessLevel, AnyProperty, DataBucket, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
 
 export default {

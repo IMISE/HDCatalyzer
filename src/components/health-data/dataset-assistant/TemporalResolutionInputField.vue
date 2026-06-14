@@ -80,9 +80,10 @@ governing permissions and limitations under the Licence.*/
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent } from 'vue';
+import type { PropType } from 'vue'
 import FormLabel from '../application/forms/form-fields/FormLabel.vue';
-import { ErrorFields } from '../application/commonTypes';
+import type { ErrorFields } from '../application/commonTypes';
 
 export default defineComponent({
     name: 'TemporalResolutionInputField',

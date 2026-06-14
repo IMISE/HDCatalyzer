@@ -47,8 +47,8 @@ governing permissions and limitations under the Licence.*/
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue';
-import { Tab } from './types';
+import type { PropType } from 'vue';
+import type { Tab } from './types';
 
 export default {
     name: 'PillTabs',

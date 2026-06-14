@@ -1,6 +1,6 @@
 /*Copyright (C) 2024 European Union
 
- __
+__
 
 Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
 
@@ -25,51 +25,30 @@ OF ANY KIND, either express or implied. See the Licence for the specific languag
 governing permissions and limitations under the Licence.*/
 <template>
   <div class="ecl-form-group d-flex flex-column">
-    <FormLabel
-      v-if="label"
-      :id="id"
-      :label="label"
-      :required="required"
-      :tooltip="tooltip"
-      :usage-note="usageNote"
-    />
+    <FormLabel v-if="label" :id="id" :label="label" :required="required" :tooltip="tooltip" :usage-note="usageNote" />
 
-    <AdditionalInformationPerCountry
-      :id="id + '-additional-info'"
-      :values="additionalInformation ?? []"
-    />
+    <AdditionalInformationPerCountry :id="id + '-additional-info'" :values="additionalInformation ?? []" />
 
-    <AlertAdditionalInfo
-      v-if="additionalInformation?.length > 0"
-      :message="$t('message.application.form.editField')"
-    />
+    <AlertAdditionalInfo v-if="additionalInformation?.length > 0" :message="$t('message.application.form.editField')" />
 
     <div class="ecl-select__container ecl-select__container--m">
-      <select class="ecl-select" :id="id"
-              :required="required"
-              :disabled="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
-              v-model="localModelValue"
-              :class="{'is-invalid': getErrorMessage.length > 0 && !touched}"
-              @click="toggleDropdown()"
-              @blur="toggleDropdown()"
-              @change="updateValue($event)"
-              data-ecl-auto-init="Select">
-        <option v-for="(item, index) in filteredItems"
-                :key="item.value + index"
-                :value="item.key">{{ item.value }}
+      <select class="ecl-select" :id="id" :required="required"
+        :disabled="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
+        v-model="localModelValue" :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }"
+        @click="toggleDropdown()" @blur="toggleDropdown()" @change="updateValue($event)" data-ecl-auto-init="Select">
+        <option v-for="(item, index) in filteredItems" :key="item.value + index" :value="item.key">{{ item.value }}
         </option>
       </select>
 
       <div class="ecl-select__icon">
         <button class="ecl-button ecl-button--icon-only" tabindex="-1">
-            <span class="ecl-button__container">
-              <span class="ecl-button__label" data-ecl-label="true">{{ label }}</span>
-              <svg :class="`ecl-icon ecl-icon--fluid ${isDropdownOpen ? '' : 'ecl-icon--rotate-180'}
-                    ecl-button__icon ecl-button__icon--after`"
-                   focusable="false" aria-hidden="true" data-ecl-icon>
-                <use xlink:href="@/assets/img/ecl/icons.svg#corner-arrow"></use>
-              </svg>
-            </span>
+          <span class="ecl-button__container">
+            <span class="ecl-button__label" data-ecl-label="true">{{ label }}</span>
+            <svg :class="`ecl-icon ecl-icon--fluid ${isDropdownOpen ? '' : 'ecl-icon--rotate-180'}
+                    ecl-button__icon ecl-button__icon--after`" focusable="false" aria-hidden="true" data-ecl-icon>
+              <use xlink:href="@/assets/img/ecl/icons.svg#corner-arrow"></use>
+            </svg>
+          </span>
         </button>
       </div>
     </div>
@@ -81,7 +60,7 @@ governing permissions and limitations under the Licence.*/
 
 <script lang="ts">
 import FormLabel from "@/components/health-data/application/forms/form-fields/FormLabel.vue";
-import {ErrorFields, SelectObject} from "@/components/health-data/application/commonTypes";
+import type { ErrorFields, SelectObject } from "@/components/health-data/application/commonTypes";
 import ErrorIcon from '@/components/health-data/common/ErrorIcon.vue';
 import ECCheckbox from "@/components/health-data/common/ECCheckbox.vue";
 import AdditionalInformationPerCountry
@@ -92,7 +71,8 @@ import AlertAdditionalInfo
 export default {
   components: {
     AlertAdditionalInfo,
-    AdditionalInformationPerCountry, ECCheckbox, ErrorIcon, FormLabel },
+    AdditionalInformationPerCountry, ECCheckbox, ErrorIcon, FormLabel
+  },
   props: {
     id: String,
     label: String,
@@ -124,7 +104,7 @@ export default {
       type: Array,
       required: false
     },
-    enabledBasedOnParentCondition : {
+    enabledBasedOnParentCondition: {
       type: Boolean,
       required: false,
       default: false
@@ -142,7 +122,7 @@ export default {
   },
   methods: {
     toggleDropdown() {
-      if (!(this.readonly && (this.additionalInformation?.length === 0 && !this.enabledBasedOnParentCondition))){
+      if (!(this.readonly && (this.additionalInformation?.length === 0 && !this.enabledBasedOnParentCondition))) {
         this.isDropdownOpen = !this.isDropdownOpen;
       }
     },
