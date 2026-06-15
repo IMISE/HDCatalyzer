@@ -26,7 +26,8 @@ governing permissions and limitations under the Licence.*/
 <template>
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
-            <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)" class="d-flex align-items-center" id="default-language-select"
+            <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.name)"
+                class="d-flex align-items-center" id="default-language-select"
                 :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" v-model:items="templates"
                 :model-value="selectedTemplate"
                 @update:model-value="(template) => selectTemplate(template, prop.path)" />

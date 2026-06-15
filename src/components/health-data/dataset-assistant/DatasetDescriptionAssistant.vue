@@ -188,7 +188,8 @@ governing permissions and limitations under the Licence.*/
                                 :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
                                 :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
                                 v-model:saved="saved"
-                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)" @handleTemplateNode="handleTemplateNode" />
+                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
+                                @handleTemplateNode="handleTemplateNode" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
@@ -470,7 +471,7 @@ export default {
                 console.warn('Falling back to local schema data.');
                 return schema.payload as HealthDcatApSchema;
             });
-        
+
 
         //const { datasetAccessLevels, prefixes, shapes } = schema.payload
 
@@ -545,7 +546,7 @@ export default {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(this.formData)
-                }) 
+                })
             } else if (this.templateDialogMode === "load") {
                 const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
                     method: 'GET'
@@ -562,13 +563,13 @@ export default {
             })
             const data = await res.json();
             this.formData.dataset[0][path] = data.dataset[0][path];
-            this.refresh()  
+            this.refresh()
         },
         sortFormInputs() {
             let sortedDatasetShapes: any = []
             orders.dataset['non-public'].forEach((entry) => {
                 this.shapes.dataset.properties.forEach((shape) => {
-                    if (shape.path === entry) {
+                    if (shape.name === entry) {
                         sortedDatasetShapes.push(shape)
                     }
                 })
