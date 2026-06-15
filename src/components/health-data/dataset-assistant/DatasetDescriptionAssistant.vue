@@ -470,6 +470,7 @@ export default {
                 console.warn('Falling back to local schema data.');
                 return schema.payload as HealthDcatApSchema;
             });
+        
 
         //const { datasetAccessLevels, prefixes, shapes } = schema.payload
 

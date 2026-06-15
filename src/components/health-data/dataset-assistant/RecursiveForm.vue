@@ -26,7 +26,7 @@ governing permissions and limitations under the Licence.*/
 <template>
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
-            <TemplateDropdownSelect class="d-flex align-items-center" id="default-language-select"
+            <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)" class="d-flex align-items-center" id="default-language-select"
                 :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" v-model:items="templates"
                 :model-value="selectedTemplate"
                 @update:model-value="(template) => selectTemplate(template, prop.path)" />
@@ -102,6 +102,7 @@ import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
 import type { AccessLevel, AnyProperty, DataBucket, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
+import { orders } from '@/utils/sortUtil'
 
 export default {
     name: 'RecursiveForm',
@@ -132,6 +133,7 @@ export default {
             selectedTemplate: "",
             templates: [],
             isDropdownOpen: false,
+            orders: orders
         }
     },
     emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node'],
