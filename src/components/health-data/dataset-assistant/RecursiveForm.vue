@@ -164,7 +164,7 @@ export default {
             this.$emit('handle-template-node', template, path)
         },
         async toggleDropdown() {
-            const response = await fetch(`http://localhost:8080/templates`)
+            const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/templates`)
             const data = await response.json();
             this.templates = data
             this.isDropdownOpen = !this.isDropdownOpen;

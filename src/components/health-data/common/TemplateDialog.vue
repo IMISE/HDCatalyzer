@@ -132,7 +132,7 @@ export default {
             }
         },
         async toggleDropdown() {
-            const response = await fetch(`http://localhost:8080/templates`)
+            const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/templates`)
             const data = await response.json();
             this.templates = data
             this.isDropdownOpen = !this.isDropdownOpen;

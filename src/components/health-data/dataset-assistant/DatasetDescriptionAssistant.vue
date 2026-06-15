@@ -538,7 +538,7 @@ export default {
     methods: {
         async handleTemplate(name: string) {
             if (this.templateDialogMode === "save") {
-                const res = await fetch(`http://localhost:8080/template/${name}`, {
+                const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -546,7 +546,7 @@ export default {
                     body: JSON.stringify(this.formData)
                 }) 
             } else if (this.templateDialogMode === "load") {
-                const res = await fetch(`http://localhost:8080/template/${name}`, {
+                const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
                     method: 'GET'
                 })
                 const data = await res.json();
@@ -556,7 +556,7 @@ export default {
             }
         },
         async handleTemplateNode(template: String, path: String) {
-            const res = await fetch(`http://localhost:8080/template/${template}`, {
+            const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${template}`, {
                 method: 'GET'
             })
             const data = await res.json();
@@ -1234,7 +1234,7 @@ export default {
 
             const body = this.buildJsonLd()
 
-            const turtle = await fetch("http://localhost:8080/jsonld-to-ttl", {
+            const turtle = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/jsonld-to-ttl`, {
                 method: 'POST',
                 body: JSON.stringify(body)
             })
