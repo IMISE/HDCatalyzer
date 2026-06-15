@@ -77,7 +77,7 @@ governing permissions and limitations under the Licence.*/
             <!-- Save button with tooltip when disabled -->
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button" data-bs-toggle="tooltip"
                 data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " :disabled="!isAuthenticated" @click="handleSave">
+                    " :disabled="true" @click="handleSave">
                 {{ $t('message.datasetDescriptionAssistant.save') }}
             </button>
 
@@ -101,8 +101,8 @@ governing permissions and limitations under the Licence.*/
             </button>
 
             <!-- Export button -->
-            <button class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle" id="export-button"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button :disabled="true" class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle"
+                id="export-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                     <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
                 </svg>
