@@ -33,7 +33,8 @@ governing permissions and limitations under the Licence.*/
                 @update:model-value="(template) => selectTemplate(template, prop.path)" />
             <div v-for="(input, i) in localBucket[prop.path] ?? []"
                 :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
-                <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
+                <button
+                    v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
                     class="btn btn-link position-absolute top-0 start-50 px-3"
                     @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
                     :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
