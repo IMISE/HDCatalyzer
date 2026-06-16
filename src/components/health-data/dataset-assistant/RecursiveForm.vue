@@ -33,6 +33,12 @@ governing permissions and limitations under the Licence.*/
                 @update:model-value="(template) => selectTemplate(template, prop.path)" />
             <div v-for="(input, i) in localBucket[prop.path] ?? []"
                 :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
+                <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
+                    class="btn btn-link position-absolute top-0 start-50 px-3"
+                    @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
+                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
+                    Translate
+                </button>
                 <!-- Remove entry button -->
                 <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
                     class="btn btn-link position-absolute top-0 end-0 px-3" @click="removeEntry(prop, i)"
@@ -137,7 +143,7 @@ export default {
             orders: orders
         }
     },
-    emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node'],
+    emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node', 'handleTranslate'],
     computed: {
         localBucket: {
             get() {
@@ -163,6 +169,9 @@ export default {
         },
     },
     methods: {
+        handleTranslate(path: string, prop: any) {
+            this.$emit('handle-translate', path, prop)
+        },
         selectTemplate(template: string, path: string) {
             this.$emit('handle-template-node', template, path)
         },

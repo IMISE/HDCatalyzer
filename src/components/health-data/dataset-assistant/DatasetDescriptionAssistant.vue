@@ -189,7 +189,7 @@ governing permissions and limitations under the Licence.*/
                                 :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
                                 v-model:saved="saved"
                                 @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                @handleTemplateNode="handleTemplateNode" />
+                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
@@ -538,6 +538,34 @@ export default {
         },
     },
     methods: {
+        async translate(path: string, prop: any) {
+            const sourceEntry = this.formData.dataset[0][path][0]
+            const text = sourceEntry.value
+            const sourceLangKey = sourceEntry.lang
+            const targetLangKey = prop.lang
+
+            const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/ai/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "text": text,
+                    "sourceLangKey": sourceLangKey,
+                    "targetLangKey": targetLangKey
+                })
+            })
+
+            const data = await response.json();
+
+            this.formData.dataset[0][path]?.forEach((entry) => {
+                if (entry._uid === prop._uid) {
+                    entry.value = data.generation
+                }
+            })
+
+            this.refresh()
+        },
         async handleTemplate(name: string) {
             if (this.templateDialogMode === "save") {
                 const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
