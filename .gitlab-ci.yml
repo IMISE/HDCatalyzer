@@ -14,11 +14,6 @@ compose_up_job:
     script:
         - docker compose up -d
 
-log_job:
-    stage: log
-    script:
-        - docker compose logs -f webapp
-
 clean:
     stage: clean
     script:
