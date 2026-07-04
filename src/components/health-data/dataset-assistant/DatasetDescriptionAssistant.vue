@@ -64,6 +64,11 @@ governing permissions and limitations under the Licence.*/
 
         <!-- Buttons -->
         <div class="d-flex justify-content-end mb-3">
+            <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot" data-bs-toggle="tooltip"
+                data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                    " @click="handleSnapshot">Create Snapshot
+            </button>
+
             <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
                     " @click="openTemplateDialog('save')">Save Template
@@ -511,6 +516,13 @@ export default {
             this.loadForm();
         }
 
+        if (this.$route.path.includes("snapshot")) {
+            const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}${this.$route.path}`)
+            const data = await res.json()
+            this.formData = data
+            this.$router.replace({ path: '/' })
+        }
+
         this.isComponentReady = true;
         this.$nextTick(() => this.upsertFakeAccessRightsInput());
     },
@@ -538,6 +550,24 @@ export default {
         },
     },
     methods: {
+        async handleSnapshot() {
+            const uuid = crypto.randomUUID()
+            try {
+                await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/snapshot/${uuid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.formData)
+                })
+
+                navigator.clipboard.writeText(`${window.location.origin}/snapshot/${uuid}`)
+
+                alert(`Snapshot created successfully. You can access it under:\n\n${window.location.origin}/snapshot/${uuid}\n\nThe link was saved to your clipboard.`)
+            } catch (e) {
+                alert(e)
+            }
+        },
         async translate(path: string, prop: any) {
             const sourceEntry = this.formData.dataset[0][path][0]
             const text = sourceEntry.value
