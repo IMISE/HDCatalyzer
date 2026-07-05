@@ -34,10 +34,13 @@ governing permissions and limitations under the Licence.*/
                 :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
                 <button
                     v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
-                    class="btn btn-link position-absolute top-0 start-50 px-3"
+                    class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
                     @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
+                    data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="'Translate'"
                     :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
-                    Translate
+                    <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                        <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
+                    </svg>
                 </button>
                 <!-- Remove entry button -->
                 <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
