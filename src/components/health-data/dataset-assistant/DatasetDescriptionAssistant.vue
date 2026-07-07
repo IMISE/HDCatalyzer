@@ -24,6 +24,29 @@ OF ANY KIND, either express or implied. See the Licence for the specific languag
 
 governing permissions and limitations under the Licence.*/
 <template>
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast text-white bg-success" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex align-items-center">
+                <div class="toast-body">
+                    {{ toastMessage }}
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="errorToast" class="toast text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex align-items-center">
+                <div class="toast-body">
+                    {{ toastMessage }}
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
     <div v-if="isComponentReady" class="ecl-container mt-4">
         <!-- Context -->
         <Accordion background-class="ecl-u-bg-primary-10 mb-4">
@@ -292,7 +315,7 @@ import type {
     ShapeRequirementTab,
     ShapeTab,
 } from './types';
-
+import { Toast } from 'bootstrap'
 const multilingualInputTypes = new Set(['text', 'textarea']);
 
 export default {
@@ -439,6 +462,7 @@ export default {
             //localDOMPurify,
             saveLocalDraftDebounced: debounce(() => this.saveLocalDraft(), 400),
             templateDialogMode: "",
+            toastMessage: "",
         };
     },
     async created() {
@@ -1229,13 +1253,15 @@ export default {
             this.saved = true; // Mark that the user has attempted to save at least once
             const success = await this.saveForm();
             if (success) {
-                this.$toast.success(this.$t('message.datasetDescriptionAssistant.saveSuccess'), {
-                    toastClassName: 'toast-success',
-                });
+                this.toastMessage = this.$t('message.datasetDescriptionAssistant.saveSuccess')
+                const toastElement = document.getElementById('successToast')
+                const toast = new Toast(toastElement)
+                toast.show()
             } else {
-                this.$toast.error(this.$t('message.datasetDescriptionAssistant.saveError'), {
-                    toastClassName: 'toast-error',
-                });
+                this.toastMessage = this.$t('message.datasetDescriptionAssistant.saveError')
+                const toastElement = document.getElementById('errorToast')
+                const toast = new Toast(toastElement)
+                toast.show()
             }
         },
         /**
@@ -1275,11 +1301,10 @@ export default {
         confirmClear() {
             this.initializeForm();
             this.refresh(); // Force a re-render to reset the form
-            // TODO
-            // this.$toast.success(this.$t('message.datasetDescriptionAssistant.clearSuccess'), {
-            //     toastClassName: 'toast-success',
-            // });
-            //if (this.isAuthenticated) this.saveForm(); // Save the cleared form
+            this.toastMessage = this.$t('message.datasetDescriptionAssistant.clearSuccess')
+            const toastElement = document.getElementById('successToast')
+            const toast = new Toast(toastElement)
+            toast.show()
         },
         /** Forces a re-render of the component by toggling the isComponentReady flag. */
         refresh() {
@@ -1320,10 +1345,10 @@ export default {
 
                     // Display a success message if there are no errors
                     if (data.result === 'SUCCESS') {
-                        // TODO
-                        // this.$toast.success(this.$t('message.datasetDescriptionAssistant.validateSuccess'), {
-                        //     toastClassName: 'toast-success',
-                        // });
+                        this.toastMessage = this.$t('message.datasetDescriptionAssistant.validateSuccess')
+                        const successToast = document.getElementById('successToast')
+                        const toast = new Toast(successToast)
+                        toast.show()
                         return {
                             errors: [],
                             warnings: warnings.map((warning) => ({ ...warning, id: generateUniqueID() })),
@@ -1338,11 +1363,10 @@ export default {
                 })
                 .catch((error) => {
                     console.error('Error in communication with validation service:', error);
-                    // TODO
-                    // this.$toast.error(
-                    //     `${this.$t('message.datasetDescriptionAssistant.validateError')}\n${error.message}`,
-                    //     { toastClassName: 'toast-error' }
-                    // );
+                    this.toastMessage = `${this.$t('message.datasetDescriptionAssistant.validateError')}\n${error.message}`
+                    const successToast = document.getElementById('errorToast')
+                    const toast = new Toast(successToast)
+                    toast.show()
                     return { errors: [], warnings: [] };
                 });
             this.validationErrors = errors;
@@ -1373,9 +1397,10 @@ export default {
 
             // Download the serialized data as a text file
             downloadTextFile('dataset.' + format, rdf, mime);
-            this.$toast.success(this.$t('message.datasetDescriptionAssistant.exportSuccess'), {
-                toastClassName: 'toast-success',
-            });
+            this.toastMessage = this.$t('message.datasetDescriptionAssistant.exportSuccess')
+            const successToast = document.getElementById('successToast')
+            const toast = new Toast(successToast)
+            toast.show()
         },
         /**
          * Serializes datasets and distributions into the appropriate format in order to build
