@@ -47,184 +47,85 @@ governing permissions and limitations under the Licence.*/
             </div>
         </div>
     </div>
-    <div v-if="isComponentReady" class="ecl-container mt-4">
-        <!-- Context -->
-        <Accordion background-class="ecl-u-bg-primary-10 mb-4">
-            <AccordionItem class="no-accent" heading-level="h2">
-                <template #title>
-                    <span class="text-primary-dark fw-bolder fs-5">
-                        {{ $t('message.datasetDescriptionAssistant.context.title') }}
-                    </span>
-                </template>
-                <!-- <section>
-                    <template v-for="paragraph in contextParagraphs">
-                        <p v-html="paragraph" />
-                    </template>
-                </section> -->
-            </AccordionItem>
-        </Accordion>
-
-        <!-- Access Level Information -->
-        <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3" id="accessLevelInfo">
-            <div v-for="level in accessLevels">
-                <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
+    <!-- <template v-for="value in shapes.dataset.properties">
+        {{ '"' + value.path + '",' }}<br>
+    </template> -->
+    <div v-if="isComponentReady" class="m-4">
+        <div class="row">
+            <div class="col-3">
+                <p v-for="c in categories"
+                    :class="'d-flex justify-content-center text-white rounded fw-bold ' + (c === categories[category] ? 'bg-primary' : 'bg-secondary')">
+                    {{ c }}
+                </p>
             </div>
-        </div>
+            <div class="col-6">
+                <e-c-confirmation-dialog ref="clearDialog" :cancelButton="'message.common.no'"
+                    :confirmButton="'message.common.yes'" :context="'message.datasetDescriptionAssistant.clearConfirm'"
+                    :title="'message.datasetDescriptionAssistant.clearTitle'" @confirm="confirmClear" />
 
-        <div class="alert alert-primary d-flex align-items-center">
-            <!-- Access Level Selection -->
-            <DropdownSelect class="d-flex align-items-center ecl-u-mr-2xl" id="access-level-select"
-                :label="$t('message.datasetDescriptionAssistant.accessLevel')"
-                :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')" :items="accessLevelItems"
-                :variant="datasetAccessLevels[selectedAccessLevel].backgroundColor" :model-value="selectedAccessLevel"
-                @update:model-value="updateAccessLevel" />
+                <TemplateDialog :mode="templateDialogMode" ref="templateDialog" :cancelButton="'message.common.no'"
+                    :confirmButton="'message.common.yes'" @confirm="handleTemplate" />
 
-            <!-- Default Language Selection -->
-            <DropdownSelect class="d-flex align-items-center" id="default-language-select"
-                :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
-                :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
-        </div>
+                <!-- Validation Errors -->
+                <section v-if="validationErrors.length || validationWarnings.length" class="mb-3"
+                    id="validation-errors">
+                    <ErrorNotification v-for="error in validationErrors" :key="error.id" :header="error.description"
+                        @close="handleCloseError(error.id)">
+                        <div v-if="error.test" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ error.test }}
+                        </div>
+                        <div v-if="error.location" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
+                            {{ error.location }}
+                        </div>
+                    </ErrorNotification>
 
-        <!-- Buttons -->
-        <div class="d-flex justify-content-end mb-3">
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot" data-bs-toggle="tooltip"
-                data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " @click="handleSnapshot">Create Snapshot
-            </button>
+                    <WarningNotification v-for="warning in validationWarnings" :key="warning.id"
+                        :header="warning.description" @close="handleCloseWarning(warning.id)">
+                        <div v-if="warning.test" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ warning.test }}
+                        </div>
+                        <div v-if="warning.location" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
+                            {{ warning.location }}
+                        </div>
+                    </WarningNotification>
+                </section>
 
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
-                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " @click="openTemplateDialog('save')">Save Template
-            </button>
-
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
-                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " @click="openTemplateDialog('load')">Load Template
-            </button>
-
-            <!-- Save button with tooltip when disabled -->
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button" data-bs-toggle="tooltip"
-                data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                    " :disabled="true" @click="handleSave">
-                {{ $t('message.datasetDescriptionAssistant.save') }}
-            </button>
-
-            <!-- Clear button -->
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="clear-button" @click="handleClear">
-                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                    <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
-                </svg>
-                {{ $t('message.datasetDescriptionAssistant.clear') }}
-            </button>
-
-            <!-- Validate button with tooltip when disabled -->
-            <!-- TODO: add :disabled="!isAuthenticated" -->
-            <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button" data-bs-toggle="tooltip"
-                data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
-                    " @click="handleValidate">
-                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                    <use xlink:href="@/assets/img/ecl/icons.svg#check"></use>
-                </svg>
-                {{ $t('message.datasetDescriptionAssistant.validate') }}
-            </button>
-
-            <!-- Export button -->
-            <button :disabled="true" class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle"
-                id="export-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                    <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
-                </svg>
-                {{ $t('message.datasetDescriptionAssistant.export') }}
-            </button>
-            <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="export-button">
-                <li v-for="(format, key) of supportedFormats" :key="key">
-                    <a class="dropdown-item" :id="`export-${key}`" :href="key" @click.prevent="handleExport">
-                        {{ format.label }}
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <e-c-confirmation-dialog ref="clearDialog" :cancelButton="'message.common.no'"
-            :confirmButton="'message.common.yes'" :context="'message.datasetDescriptionAssistant.clearConfirm'"
-            :title="'message.datasetDescriptionAssistant.clearTitle'" @confirm="confirmClear" />
-
-        <TemplateDialog :mode="templateDialogMode" ref="templateDialog" :cancelButton="'message.common.no'"
-            :confirmButton="'message.common.yes'" @confirm="handleTemplate" />
-
-        <!-- Validation Errors -->
-        <section v-if="validationErrors.length || validationWarnings.length" class="mb-3" id="validation-errors">
-            <ErrorNotification v-for="error in validationErrors" :key="error.id" :header="error.description"
-                @close="handleCloseError(error.id)">
-                <div v-if="error.test" class="ecl-notification__description">
-                    <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ error.test }}
-                </div>
-                <div v-if="error.location" class="ecl-notification__description">
-                    <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
-                    {{ error.location }}
-                </div>
-            </ErrorNotification>
-
-            <WarningNotification v-for="warning in validationWarnings" :key="warning.id" :header="warning.description"
-                @close="handleCloseWarning(warning.id)">
-                <div v-if="warning.test" class="ecl-notification__description">
-                    <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ warning.test }}
-                </div>
-                <div v-if="warning.location" class="ecl-notification__description">
-                    <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
-                    {{ warning.location }}
-                </div>
-            </WarningNotification>
-        </section>
-
-        <PillTabs class="mb-3" :tabs="pills" v-model:active-tab="activePill">
-            <!-- Pill Label -->
-            <template #tab-label="{ tab: pill }: { tab: ShapeTab }">
-                {{ pill.label }}
-                <template v-if="pill.id === 'dataset' || pill.id === 'distribution'">
-                    {{ getFieldCount(`${pill.id}-mandatory`) }}
-                </template>
-            </template>
-
-            <!-- Pill Content -->
-            <template #tab-content="{ tab: pill }: { tab: ShapeTab }">
-                <!-- Shape Information -->
-                <div class="ecl-u-shadow-1 bg-primary-subtle ecl-u-border-radius-8 mb-4 px-4 py-3">
-                    <strong>{{ pill.label }}:</strong>
-                    {{ $t(`message.datasetDescriptionAssistant.${pill.id}.definition`) }}
-                </div>
-
-                <NavTabs :id="`${pill.id}`" :tabs="tabs[pill.id]" v-model:active-tab="activeTab[pill.id]">
-                    <!-- Tab Label -->
-                    <template #tab-label="{ tab }: { tab: ShapeRequirementTab }">
-                        <span class="p-1">{{ tab.label }}</span>
-                        <span :class="['container-circle mx-1 p-2', tab.bgClass]" aria-hidden="true">
-                            {{ tab.label[0] }}
-                        </span>
-                        <span class="p-1 fw-normal" :id="`counter-${tab.label}`">
-                            {{ getFieldCount(tab.id) }}
-                        </span>
+                <PillTabs class="mb-3" :tabs="pills" v-model:active-tab="activePill">
+                    <!-- Pill Label -->
+                    <template #tab-label="{ tab: pill }: { tab: ShapeTab }">
+                        {{ pill.label }}
+                        <template v-if="pill.id === 'dataset' || pill.id === 'distribution'">
+                            {{ getFieldCount(`${pill.id}-mandatory`) }}
+                        </template>
                     </template>
 
-                    <!-- Tab Content -->
-                    <template #tab-content="{ tab }: { tab: ShapeRequirementTab }">
+                    <!-- Pill Content -->
+                    <template #tab-content="{ tab: pill }: { tab: ShapeTab }">
+                        <!-- Shape Information -->
+                        <div class="ecl-u-shadow-1 bg-primary-subtle ecl-u-border-radius-8 mb-4 px-4 py-3">
+                            <strong>{{ pill.label }}:</strong>
+                            {{ $t(`message.datasetDescriptionAssistant.${pill.id}.definition`) }}
+                        </div>
+
                         <!-- Single bucket for dataset -->
                         <template v-if="pill.id === 'dataset'">
                             <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
-                                :id-prefix="`${tab.id}-0`" :properties="getPropertiesForRequirement(pill.id, getRequirement(tab.id), formData[pill.id][0])
-                                    " :selected-access-level="selectedAccessLevel"
-                                :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
-                                :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
-                                v-model:saved="saved" v-model:translateLoading="translateLoading"
+                                :id-prefix="`${pill.id}-0`" :properties="shapes.dataset.properties"
+                                :selected-access-level="selectedAccessLevel" :has-any-filled-inputs="hasAnyFilledInputs"
+                                :is-multilingual="isMultilingual" :is-iri="isIRI" :is-required="isRequired"
+                                v-model:bucket="formData[pill.id][0]" v-model:saved="saved" :category="category"
                                 @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate" />
+                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
+                                v-model:translateLoading="translateLoading" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
                         <template v-else>
                             <Accordion>
-                                <AccordionItem v-for="(_, i) in formData[pill.id]" :key="`${tab.id}-${i}`"
-                                    class="form-content" :id="`${tab.id}-${i}`">
+                                <AccordionItem v-for="(_, i) in formData[pill.id]" :key="`${pill.id}-${i}`"
+                                    class="form-content" :id="`${pill.id}-${i}`">
                                     <template #title>
                                         <div class="position-relative">
                                             <span class="fw-bolder">{{ pill.label }} #{{ i + 1 }}</span>
@@ -240,12 +141,9 @@ governing permissions and limitations under the Licence.*/
                                         </div>
                                     </template>
 
-                                    <RecursiveForm class="mt-3" :id-prefix="`${tab.id}-${i}`" :properties="getPropertiesForRequirement(
-                                        pill.id,
-                                        getRequirement(tab.id),
-                                        formData[pill.id][i]
-                                    )
-                                        " :selected-access-level="selectedAccessLevel"
+                                    <RecursiveForm class="mt-3" :id-prefix="`${pill.id}-${i}`"
+                                        :properties="shapes.distribution.properties"
+                                        :selected-access-level="selectedAccessLevel"
                                         :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
                                         :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][i]"
                                         v-model:saved="saved"
@@ -256,7 +154,7 @@ governing permissions and limitations under the Licence.*/
                             <!-- Add another distribution/sample/analytics entry -->
                             <button
                                 class="btn btn-link d-flex align-items-center ecl-u-shadow-1 bg-white ecl-u-border-radius-8 mt-3 px-3 py-2"
-                                :id="'addAnalytics-' + tab.id" @click="handleAddAnotherBucket(pill.id)">
+                                :id="'addAnalytics-' + pill.id" @click="handleAddAnotherBucket(pill.id)">
                                 <span class="btn btn-sm ecl-u-bg-primary text-white me-3">
                                     <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                                         <use xlink:href="@/assets/img/ecl/icons.svg#plus"></use>
@@ -268,9 +166,115 @@ governing permissions and limitations under the Licence.*/
                             </button>
                         </template>
                     </template>
-                </NavTabs>
-            </template>
-        </PillTabs>
+                </PillTabs>
+                <div class="d-flex justify-content-end m-4">
+                    <button class="btn btn-secondary me-2" @click="category--; refresh()"
+                        :disabled="category === 0">Previous</button>
+                    <button class="btn btn-primary "
+                        :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''"
+                        @click="category++; refresh()" :disabled="category === categories.length - 1">Next</button>
+                </div>
+            </div>
+            <div class="col-3">
+                <!-- Context -->
+                <Accordion background-class="ecl-u-bg-primary-10 mb-4">
+                    <AccordionItem class="no-accent" heading-level="h2">
+                        <template #title>
+                            <span class="text-primary-dark fw-bolder fs-5">
+                                {{ $t('message.datasetDescriptionAssistant.context.title') }}
+                            </span>
+                        </template>
+                        <!-- <section>
+                    <template v-for="paragraph in contextParagraphs">
+                        <p v-html="paragraph" />
+                    </template>
+                </section> -->
+                    </AccordionItem>
+                </Accordion>
+
+                <!-- Access Level Information -->
+                <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3"
+                    id="accessLevelInfo">
+                    <div v-for="level in accessLevels">
+                        <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
+                    </div>
+                </div>
+
+                <div class="alert alert-primary">
+                    <!-- Access Level Selection -->
+                    <DropdownSelect class="d-flex align-items-center ecl-u-mr-2xl" id="access-level-select"
+                        :label="$t('message.datasetDescriptionAssistant.accessLevel')"
+                        :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')"
+                        :items="accessLevelItems" :variant="datasetAccessLevels[selectedAccessLevel].backgroundColor"
+                        :model-value="selectedAccessLevel" @update:model-value="updateAccessLevel" />
+
+                    <!-- Default Language Selection -->
+                    <DropdownSelect class="d-flex align-items-center mt-4" id="default-language-select"
+                        :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
+                        :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
+                </div>
+
+                <!-- Buttons -->
+                <div class="mb-3">
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot"
+                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                            " @click="handleSnapshot">Create Snapshot
+                    </button>
+
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
+                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                            " @click="openTemplateDialog('save')">Save Template
+                    </button>
+
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
+                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                            " @click="openTemplateDialog('load')">Load Template
+                    </button>
+
+                    <!-- Save button with tooltip when disabled -->
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button" data-bs-toggle="tooltip"
+                        data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                            " :disabled="true" @click="handleSave">
+                        {{ $t('message.datasetDescriptionAssistant.save') }}
+                    </button>
+
+                    <!-- Clear button -->
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="clear-button" @click="handleClear">
+                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                            <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
+                        </svg>
+                        {{ $t('message.datasetDescriptionAssistant.clear') }}
+                    </button>
+
+                    <!-- Validate button with tooltip when disabled -->
+                    <!-- TODO: add :disabled="!isAuthenticated" -->
+                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button"
+                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
+                            " @click="handleValidate">
+                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                            <use xlink:href="@/assets/img/ecl/icons.svg#check"></use>
+                        </svg>
+                        {{ $t('message.datasetDescriptionAssistant.validate') }}
+                    </button>
+
+                    <!-- Export button -->
+                    <button :disabled="true" class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle"
+                        id="export-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                            <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
+                        </svg>
+                        {{ $t('message.datasetDescriptionAssistant.export') }}
+                    </button>
+                    <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="export-button">
+                        <li v-for="(format, key) of supportedFormats" :key="key">
+                            <a class="dropdown-item" :id="`export-${key}`" :href="key" @click.prevent="handleExport">
+                                {{ format.label }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
     <ECLoadingIndicator v-else :loadingBar="!isComponentReady" />
 </template>
@@ -290,7 +294,7 @@ import PillTabs from '../common/tabs/PillTabs.vue';
 import RecursiveForm from './RecursiveForm.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
 import UtilService from '@/services/utilService';
-import { orders } from '@/utils/sortUtil'
+import { orders, categories, datasetCategoriesMap } from '@/utils/sortUtil'
 import {
     cloneDeepAndPrune,
     generateUniqueID,
@@ -464,6 +468,9 @@ export default {
             templateDialogMode: "",
             toastMessage: "",
             translateLoading: false,
+            categories: categories,
+            datasetCategoriesMap: datasetCategoriesMap,
+            category: 0,
         };
     },
     async created() {
@@ -501,9 +508,6 @@ export default {
                 console.warn('Falling back to local schema data.');
                 return schema.payload as HealthDcatApSchema;
             });
-
-
-        //const { datasetAccessLevels, prefixes, shapes } = schema.payload
 
         // Extract dataset and distribution shapes, sort their properties and map select options
         // to the correct format for the dropdowns
@@ -654,7 +658,7 @@ export default {
             let sortedDatasetShapes: any = []
             orders.dataset['non-public'].forEach((entry) => {
                 this.shapes.dataset.properties.forEach((shape) => {
-                    if (shape.name === entry) {
+                    if (shape.path === entry) {
                         sortedDatasetShapes.push(shape)
                     }
                 })
