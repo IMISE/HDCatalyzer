@@ -55,7 +55,7 @@ governing permissions and limitations under the Licence.*/
         :usage-note="getLocaleText(input.usageNote)" :placeholder="getLocaleText(input.placeholder)" :type="input.type"
         :multilingual="multilingual" :display-limit="false" :error-fields="errorFields" :readonly="readonly"
         :required="required" v-model="internalValue.value" v-model:language="internalValue.lang"
-        @blur="updateErrorFields" />
+        :translateLoading="translateLoading" @blur="updateErrorFields" />
 </template>
 
 <script lang="ts">
@@ -103,6 +103,7 @@ export default {
             } | null>,
             default: null,
         },
+        translateLoading: { type: Boolean },
     },
     computed: {
         flatpickrConfig(): any {

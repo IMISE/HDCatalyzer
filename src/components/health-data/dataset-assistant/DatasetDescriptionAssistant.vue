@@ -215,7 +215,7 @@ governing permissions and limitations under the Licence.*/
                                     " :selected-access-level="selectedAccessLevel"
                                 :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
                                 :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
-                                v-model:saved="saved"
+                                v-model:saved="saved" v-model:translateLoading="translateLoading"
                                 @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
                                 @handleTemplateNode="handleTemplateNode" @handleTranslate="translate" />
                         </template>
@@ -463,6 +463,7 @@ export default {
             saveLocalDraftDebounced: debounce(() => this.saveLocalDraft(), 400),
             templateDialogMode: "",
             toastMessage: "",
+            translateLoading: false,
         };
     },
     async created() {
@@ -598,6 +599,7 @@ export default {
             const sourceLangKey = sourceEntry.lang
             const targetLangKey = prop.lang
 
+            this.translateLoading = true;
             const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/ai/generate`, {
                 method: 'POST',
                 headers: {
@@ -619,6 +621,7 @@ export default {
             })
 
             this.refresh()
+            this.translateLoading = false;
         },
         async handleTemplate(name: string) {
             if (this.templateDialogMode === "save") {

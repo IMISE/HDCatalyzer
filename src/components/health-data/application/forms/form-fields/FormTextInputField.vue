@@ -37,12 +37,13 @@ governing permissions and limitations under the Licence.*/
         :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :type="type"
         :placeholder="placeholder" :required="required"
         :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
-        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" />
+        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" :disabled="translateLoading" />
       <textarea v-else-if="type === 'textarea'" class="ecl-text-area flex-grow-1"
         :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :placeholder="placeholder" rows="4"
         :required="required"
         :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
-        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)"></textarea>
+        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)"
+        :disabled="translateLoading"></textarea>
 
       <!-- Language selector -->
       <div v-if="multilingual"
@@ -141,7 +142,8 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    }
+    },
+    translateLoading: { type: Boolean },
   },
   computed: {
     getErrorMessage(): string {

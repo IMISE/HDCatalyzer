@@ -37,7 +37,8 @@ governing permissions and limitations under the Licence.*/
                     class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
                     @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
                     data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="'Translate'"
-                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
+                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`"
+                    :disabled="translateLoading">
                     <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                         <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
                     </svg>
@@ -53,8 +54,8 @@ governing permissions and limitations under the Licence.*/
                 </button>
 
                 <!-- Leaf: render a single field -->
-                <DynamicInputField v-if="!prop.nestedProperties?.length" class="mb-3"
-                    :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
+                <DynamicInputField :translateLoading="translateLoading" v-if="!prop.nestedProperties?.length"
+                    class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
                     :input="prop.input" :multilingual="isMultilingual(prop)"
                     :readonly="!!prop.hasValue || prop.input.readonly" :required="isRequired(prop, parent, localBucket)"
                     :date-range="getDateRange(prop, i)" v-model="localBucket[prop.path][i]"
@@ -143,7 +144,8 @@ export default {
             selectedTemplate: "",
             templates: [],
             isDropdownOpen: false,
-            orders: orders
+            orders: orders,
+            translateLoading: false,
         }
     },
     emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node', 'handleTranslate'],
@@ -173,6 +175,7 @@ export default {
     },
     methods: {
         handleTranslate(path: string, prop: any) {
+            this.translateLoading = true
             this.$emit('handle-translate', path, prop)
         },
         selectTemplate(template: string, path: string) {
