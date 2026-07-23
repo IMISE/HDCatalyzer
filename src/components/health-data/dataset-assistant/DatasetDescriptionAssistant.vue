@@ -320,7 +320,6 @@ import type {
     ShapeTab,
 } from './types';
 import { Toast } from 'bootstrap'
-import { transformWithEsbuild } from 'vite';
 import { downloadTextFile } from '@/utils/rdfGenerator.ts';
 const multilingualInputTypes = new Set(['text', 'textarea']);
 
