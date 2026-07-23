@@ -583,7 +583,7 @@ export default {
         async handleSnapshot() {
             const uuid = crypto.randomUUID()
             try {
-                await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/snapshot/${uuid}`, {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/snapshot/${uuid}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -591,11 +591,18 @@ export default {
                     body: JSON.stringify(this.formData)
                 })
 
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
                 navigator.clipboard.writeText(`${window.location.origin}/snapshot/${uuid}`)
 
                 alert(`Snapshot created successfully. You can access it under:\n\n${window.location.origin}/snapshot/${uuid}\n\nThe link was saved to your clipboard.`)
-            } catch (e) {
-                alert(e)
+            } catch (error: any) {
+                this.toastMessage = error
+                const toastElement = document.getElementById('errorToast')
+                const toast = new Toast(toastElement)
+                toast.show()
             }
         },
         async translate(path: string, prop: any) {
@@ -605,55 +612,122 @@ export default {
             const targetLangKey = prop.lang
 
             this.translateLoading = true;
-            const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/ai/generate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "text": text,
-                    "sourceLangKey": sourceLangKey,
-                    "targetLangKey": targetLangKey
-                })
-            })
-
-            const data = await response.json();
-
-            this.formData.dataset[0][path]?.forEach((entry) => {
-                if (entry._uid === prop._uid) {
-                    entry.value = data.generation
-                }
-            })
-
-            this.refresh()
-            this.translateLoading = false;
-        },
-        async handleTemplate(name: string) {
-            if (this.templateDialogMode === "save") {
-                const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/ai/generate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(this.formData)
+                    body: JSON.stringify({
+                        "text": text,
+                        "sourceLangKey": sourceLangKey,
+                        "targetLangKey": targetLangKey
+                    })
                 })
-            } else if (this.templateDialogMode === "load") {
-                const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
-                    method: 'GET'
-                })
-                const data = await res.json();
 
-                this.formData = data
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                this.formData.dataset[0][path]?.forEach((entry) => {
+                    if (entry._uid === prop._uid) {
+                        entry.value = data.generation
+                    }
+                })
+
+                this.translateLoading = false;
+                this.refresh()
+            } catch (error: any) {
+                this.toastMessage = error
+                const toastElement = document.getElementById('errorToast')
+                const toast = new Toast(toastElement)
+                toast.show()
+
+                this.translateLoading = false;
+
                 this.refresh()
             }
         },
+        async handleTemplate(name: string) {
+            if (this.templateDialogMode === "save") {
+                try {
+                    const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.formData)
+                    })
+
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    } else {
+                        this.toastMessage = "Template successfully saved."
+                        const toastElement = document.getElementById('successToast')
+                        const toast = new Toast(toastElement)
+                        toast.show()
+                    }
+                } catch (error: any) {
+                    this.toastMessage = error
+                    const toastElement = document.getElementById('errorToast')
+                    const toast = new Toast(toastElement)
+                    toast.show()
+                }
+
+            } else if (this.templateDialogMode === "load") {
+                try {
+                    const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${name}`)
+
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    this.formData = data
+
+                    this.refresh()
+
+                    this.toastMessage = "Template successfully loaded."
+                    const toastElement = document.getElementById('successToast')
+                    const toast = new Toast(toastElement)
+                    toast.show()
+                } catch (error: any) {
+                    this.toastMessage = error
+                    const toastElement = document.getElementById('errorToast')
+                    const toast = new Toast(toastElement)
+                    toast.show()
+                }
+            }
+        },
         async handleTemplateNode(template: String, path: String) {
-            const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${template}`, {
-                method: 'GET'
-            })
-            const data = await res.json();
-            this.formData.dataset[0][path] = data.dataset[0][path];
-            this.refresh()
+            try {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/template/${template}`, {
+                    method: 'GET'
+                })
+
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                this.formData.dataset[0][path] = data.dataset[0][path];
+
+                this.refresh()
+
+                this.toastMessage = "Template node successfully loaded."
+                const toastElement = document.getElementById('successToast')
+                const toast = new Toast(toastElement)
+                toast.show()
+            } catch (error: any) {
+                this.toastMessage = error
+                const toastElement = document.getElementById('errorToast')
+                const toast = new Toast(toastElement)
+                toast.show()
+            }
         },
         sortFormInputs() {
             let sortedDatasetShapes: any = []
@@ -1339,8 +1413,6 @@ export default {
             })
 
             const data = await turtle.text()
-
-            console.log(data)
 
             // Send the validation request
             const { errors, warnings } = await fetch(url, {
