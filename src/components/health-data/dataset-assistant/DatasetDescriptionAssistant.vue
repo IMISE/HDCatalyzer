@@ -53,7 +53,7 @@ governing permissions and limitations under the Licence.*/
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
             <div class="col-3">
-                <p v-for="c in categories"
+                <p v-for="c in categories" @click="category = categories.indexOf(c)"
                     :class="'d-flex justify-content-center text-white rounded fw-bold ' + (c === categories[category] ? 'bg-primary' : 'bg-secondary')">
                     {{ c }}
                 </p>
@@ -258,8 +258,8 @@ governing permissions and limitations under the Licence.*/
                     </button>
 
                     <!-- Export button -->
-                    <button :disabled="true" class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle"
-                        id="export-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle" id="export-button"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                             <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
                         </svg>
@@ -320,6 +320,8 @@ import type {
     ShapeTab,
 } from './types';
 import { Toast } from 'bootstrap'
+import { transformWithEsbuild } from 'vite';
+import { downloadTextFile } from '@/utils/rdfGenerator.ts';
 const multilingualInputTypes = new Set(['text', 'textarea']);
 
 export default {
@@ -444,19 +446,19 @@ export default {
                     label: 'N-Triples',
                     mime: 'application/n-triples',
                     // transform: jsonLdToNTriples,
-                    endpoint: '',
+                    //endpoint: '',
                 },
                 ttl: {
                     label: 'Turtle',
                     mime: 'text/turtle',
                     // transform: jsonLdToTurtle, 
-                    endpoint: ''
+                    //endpoint: ''
                 },
                 rdf: {
                     label: 'RDF/XML',
                     mime: 'application/rdf+xml',
                     // transform: jsonLdToRdfXml,
-                    endpoint: '/rdf/convert/rdf-xml',
+                    //endpoint: '/rdf/convert/rdf-xml',
                 },
             },
             formData: {} as Record<Shape, DataBucket[]>,
@@ -1326,12 +1328,20 @@ export default {
 
             const body = this.buildJsonLd()
 
-            const turtle = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/jsonld-to-ttl`, {
+            const turtle = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/convert`, {
                 method: 'POST',
-                body: JSON.stringify(body)
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "content": JSON.stringify(body),
+                    "type": "text/turtle",
+                })
             })
 
             const data = await turtle.text()
+
+            console.log(data)
 
             // Send the validation request
             const { errors, warnings } = await fetch(url, {
@@ -1395,15 +1405,26 @@ export default {
             const format = target.getAttribute('href') as keyof typeof this.supportedFormats;
             if (!this.supportedFormats[format]) return console.warn('Unknown export format:', format);
 
-            if (this.isAuthenticated) await this.saveForm();
+            //if (this.isAuthenticated) await this.saveForm();
             const jsonLd = this.buildJsonLd();
-            const { mime, transform, endpoint } = this.supportedFormats[format];
+            const { mime } = this.supportedFormats[format];
 
             // @ts-ignore-next-line
-            const rdf = await transform(jsonLd, "https://health-data-access.acceptance.data.health.europa.eu" + endpoint);
+            const rdf = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/convert`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "content": JSON.stringify(jsonLd),
+                    "type": mime
+                })
+            });
+
+            const rdfData = await rdf.text()
 
             // Download the serialized data as a text file
-            downloadTextFile('dataset.' + format, rdf, mime);
+            downloadTextFile('dataset.' + format, rdfData, mime);
             this.toastMessage = this.$t('message.datasetDescriptionAssistant.exportSuccess')
             const successToast = document.getElementById('successToast')
             const toast = new Toast(successToast)
