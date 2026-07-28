@@ -167,7 +167,7 @@ export const datasetCategoriesMap = {
   "dpv:hasPurpose": "other",
   "dcat:theme": "general",
   "dct:provenance": "other",
-  "dct:creator": "other",
+  "dct:creator": "creator",
   "prov:wasGeneratedBy": "other",
   "dcat:keyword": "general",
   "dct:language": "general",
@@ -214,5 +214,12 @@ export const datasetCategoriesMap = {
 }
 
 export const categories = [
-  "general", "dataset structure", "other"
+  "general", "dataset structure", "creator", "other"
+]
+
+export const klinikenPaths = [
+  "dct:creator",
+  "dct:publisher",
+  "healthdcatap:hdab",
+  // TODO: add data holder path
 ]

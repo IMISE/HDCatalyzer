@@ -117,7 +117,7 @@ governing permissions and limitations under the Licence.*/
                                 :is-multilingual="isMultilingual" :is-iri="isIRI" :is-required="isRequired"
                                 v-model:bucket="formData[pill.id][0]" v-model:saved="saved" :category="category"
                                 @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
+                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate" @handle-klinik-select="handleKlinikSelect"
                                 v-model:translateLoading="translateLoading" />
                         </template>
 
@@ -719,6 +719,25 @@ export default {
                 this.refresh()
 
                 this.toastMessage = "Template node successfully loaded."
+                const toastElement = document.getElementById('successToast')
+                const toast = new Toast(toastElement)
+                toast.show()
+            } catch (error: any) {
+                this.toastMessage = error
+                const toastElement = document.getElementById('errorToast')
+                const toast = new Toast(toastElement)
+                toast.show()
+            }
+        },
+        handleKlinikSelect(klinik: any, path: String) {
+            try {
+                this.formData.dataset[0][path][0].nestedValues['foaf:name'][0].value = klinik['Name']
+                this.formData.dataset[0][path][0].nestedValues['foaf:homepage'][0].value = klinik['URL']
+                this.formData.dataset[0][path][0].nestedValues['foaf:mbox'][0].value = klinik['EMail']
+
+                this.refresh()
+
+                this.toastMessage = "Clinic successfully loaded."
                 const toastElement = document.getElementById('successToast')
                 const toast = new Toast(toastElement)
                 toast.show()

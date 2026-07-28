@@ -27,10 +27,13 @@ governing permissions and limitations under the Licence.*/
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
             <template v-if="datasetCategoriesMap[prop.path] === categories[category]">
-                <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)"
-                    class="d-flex align-items-center justify-content-end" id="default-language-select"
-                    v-model:items="templates" :model-value="selectedTemplate"
-                    @update:model-value="(template) => selectTemplate(template, prop.path)" />
+                <div class="d-flex justify-content-end">
+                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="me-4" id="kliniken-select" :items="kliniken"
+                        :model-value="selectedKlinik" @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path)" />
+                    <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)" id="default-language-select"
+                        v-model:items="templates" :model-value="selectedTemplate"
+                        @update:model-value="(template) => selectTemplate(template, prop.path)" />
+                </div>
                 <div v-for="(input, i) in localBucket[prop.path] ?? []"
                     :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
                     <button
@@ -117,11 +120,12 @@ import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
 import type { AccessLevel, AnyProperty, DataBucket, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
-import { orders, categories, datasetCategoriesMap } from '@/utils/sortUtil'
+import { orders, categories, datasetCategoriesMap, klinikenPaths } from '@/utils/sortUtil'
+import KlinikenDropdownSelect from './KlinikenDropdownSelect.vue';
 
 export default {
     name: 'RecursiveForm',
-    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect },
+    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect, KlinikenDropdownSelect },
     props: {
         idPrefix: { type: String, required: true },
         properties: { type: Array as PropType<AnyProperty[]>, required: true },
@@ -153,9 +157,12 @@ export default {
             translateLoading: false,
             categories: categories,
             datasetCategoriesMap: datasetCategoriesMap,
+            selectedKlinik: "",
+            kliniken: [],
+            klinikenPaths: klinikenPaths,
         }
     },
-    emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node', 'handleTranslate'],
+    emits: ['update:bucket', 'update:saved', 'add-another', 'handle-template-node', 'handle-translate', 'handle-klinik-select'],
     computed: {
         localBucket: {
             get() {
@@ -187,6 +194,10 @@ export default {
         },
         selectTemplate(template: string, path: string) {
             this.$emit('handle-template-node', template, path)
+        },
+        selectKlinik(klinik: any, path: string) {
+            console.log(klinik);
+            this.$emit('handle-klinik-select', klinik, path)
         },
         async toggleDropdown() {
             const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/templates`)
