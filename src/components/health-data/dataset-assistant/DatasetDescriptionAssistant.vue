@@ -117,7 +117,8 @@ governing permissions and limitations under the Licence.*/
                                 :is-multilingual="isMultilingual" :is-iri="isIRI" :is-required="isRequired"
                                 v-model:bucket="formData[pill.id][0]" v-model:saved="saved" :category="category"
                                 @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate" @handle-klinik-select="handleKlinikSelect"
+                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
+                                @handle-klinik-select="handleKlinikSelect"
                                 v-model:translateLoading="translateLoading" />
                         </template>
 
@@ -729,11 +730,15 @@ export default {
                 toast.show()
             }
         },
-        handleKlinikSelect(klinik: any, path: String) {
+        handleKlinikSelect(klinik: any, path: string, input: any) {
             try {
-                this.formData.dataset[0][path][0].nestedValues['foaf:name'][0].value = klinik['Name']
-                this.formData.dataset[0][path][0].nestedValues['foaf:homepage'][0].value = klinik['URL']
-                this.formData.dataset[0][path][0].nestedValues['foaf:mbox'][0].value = klinik['EMail']
+                this.formData.dataset[0][path].forEach(element => {
+                    if (element._uid === input._uid) {
+                        element.nestedValues['foaf:name'][0].value = klinik['Name']
+                        element.nestedValues['foaf:homepage'][0].value = klinik['URL']
+                        element.nestedValues['foaf:mbox'][0].value = klinik['EMail']
+                    }
+                });
 
                 this.refresh()
 

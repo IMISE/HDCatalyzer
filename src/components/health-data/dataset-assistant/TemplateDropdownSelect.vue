@@ -35,7 +35,7 @@ governing permissions and limitations under the Licence.*/
             </i>
         </label>
 
-        <div class="dropdown">
+        <div class="dropdown mb-4">
             <button class="ecl-button ecl-button--primary fw-bold pe-1" :class="variant" :id="id"
                 data-bs-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false" v-on="{
                     'hide.bs.dropdown': () => (isOpen = false),

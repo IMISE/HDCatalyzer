@@ -28,14 +28,15 @@ governing permissions and limitations under the Licence.*/
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
             <template v-if="datasetCategoriesMap[prop.path] === categories[category]">
                 <div class="d-flex justify-content-end">
-                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="me-4" id="kliniken-select" :items="kliniken"
-                        :model-value="selectedKlinik" @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path)" />
-                    <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)" id="default-language-select"
-                        v-model:items="templates" :model-value="selectedTemplate"
+                    <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)"
+                        id="default-language-select" v-model:items="templates" :model-value="selectedTemplate"
                         @update:model-value="(template) => selectTemplate(template, prop.path)" />
                 </div>
                 <div v-for="(input, i) in localBucket[prop.path] ?? []"
                     :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
+                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="position-absolute top-0"
+                        style="right: 150px" id="kliniken-select" :items="kliniken" :model-value="selectedKlinik"
+                        @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
                     <button
                         v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
                         class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
@@ -195,9 +196,8 @@ export default {
         selectTemplate(template: string, path: string) {
             this.$emit('handle-template-node', template, path)
         },
-        selectKlinik(klinik: any, path: string) {
-            console.log(klinik);
-            this.$emit('handle-klinik-select', klinik, path)
+        selectKlinik(klinik: any, path: string, input: any) {
+            this.$emit('handle-klinik-select', klinik, path, input)
         },
         async toggleDropdown() {
             const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/templates`)
