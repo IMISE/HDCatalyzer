@@ -25,27 +25,7 @@ OF ANY KIND, either express or implied. See the Licence for the specific languag
 governing permissions and limitations under the Licence.*/
 <template>
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="successToast" class="toast text-white bg-success" role="alert" aria-live="assertive"
-            aria-atomic="true">
-            <div class="d-flex align-items-center">
-                <div class="toast-body">
-                    {{ toastMessage }}
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="errorToast" class="toast text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex align-items-center">
-                <div class="toast-body">
-                    {{ toastMessage }}
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
-        </div>
+        <CustomToast v-for="toast in toasts" :id="toast.id" :type="toast.type" :message="toast.message" />
     </div>
     <!-- <template v-for="value in shapes.dataset.properties">
         {{ '"' + value.path + '",' }}<br>
@@ -322,6 +302,7 @@ import type {
 } from './types';
 import { Toast } from 'bootstrap'
 import { downloadTextFile } from '@/utils/rdfGenerator.ts';
+import CustomToast from './CustomToast.vue';
 const multilingualInputTypes = new Set(['text', 'textarea']);
 
 export default {
@@ -338,6 +319,7 @@ export default {
         RecursiveForm,
         WarningNotification,
         TemplateDialog,
+        CustomToast,
     },
     head() {
         return {
@@ -473,6 +455,20 @@ export default {
             categories: categories,
             datasetCategoriesMap: datasetCategoriesMap,
             category: 0,
+            toasts: [
+                { "id": "createSnapshotErrorToast", "type": "danger" },
+                { "id": "translateErrorToast", "type": "danger" },
+                { "id": "saveTemplateSuccessToast", "type": "success" },
+                { "id": "saveTemplateErrorToast", "type": "danger" },
+                { "id": "loadTemplateSuccessToast", "type": "success" },
+                { "id": "loadTemplateErrorToast", "type": "danger" },
+                { "id": "loadTemplateNodeSuccessToast", "type": "success" },
+                { "id": "klinikSuccessToast", "type": "success" },
+                { "id": "klinikErrorToast", "type": "danger" },
+                { "id": "saveSuccessToast", "type": "success" },
+                { "id": "saveErrorToast", "type": "danger" },
+                { "id": "clearSuccessToast", "type": "success" },
+            ],
         };
     },
     async created() {
@@ -600,8 +596,8 @@ export default {
 
                 alert(`Snapshot created successfully. You can access it under:\n\n${window.location.origin}/snapshot/${uuid}\n\nThe link was saved to your clipboard.`)
             } catch (error: any) {
-                this.toastMessage = error
-                const toastElement = document.getElementById('errorToast')
+                let toastElement = document.getElementById('createSnapshotErrorToast')
+                toastElement.children[0].children[0].innerHTML = error
                 const toast = new Toast(toastElement)
                 toast.show()
             }
@@ -641,8 +637,8 @@ export default {
                 this.translateLoading = false;
                 this.refresh()
             } catch (error: any) {
-                this.toastMessage = error
-                const toastElement = document.getElementById('errorToast')
+                const toastElement = document.getElementById('translateErrorToast')
+                toastElement.children[0].children[0].innerHTML = error
                 const toast = new Toast(toastElement)
                 toast.show()
 
@@ -665,14 +661,14 @@ export default {
                     if (!response.ok) {
                         throw new Error(`Response status: ${response.status}`);
                     } else {
-                        this.toastMessage = "Template successfully saved."
-                        const toastElement = document.getElementById('successToast')
+                        const toastElement = document.getElementById('saveTemplateSuccessToast')
+                        toastElement.children[0].children[0].innerHTML = "Template successfully saved."
                         const toast = new Toast(toastElement)
                         toast.show()
                     }
                 } catch (error: any) {
-                    this.toastMessage = error
-                    const toastElement = document.getElementById('errorToast')
+                    const toastElement = document.getElementById('saveTemplateErrorToast')
+                    toastElement.children[0].children[0].innerHTML = error
                     const toast = new Toast(toastElement)
                     toast.show()
                 }
@@ -691,13 +687,13 @@ export default {
 
                     this.refresh()
 
-                    this.toastMessage = "Template successfully loaded."
-                    const toastElement = document.getElementById('successToast')
+                    const toastElement = document.getElementById('loadTemplateSuccessToast')
+                    toastElement.children[0].children[0].innerHTML = "Template successfully loaded."
                     const toast = new Toast(toastElement)
                     toast.show()
                 } catch (error: any) {
-                    this.toastMessage = error
-                    const toastElement = document.getElementById('errorToast')
+                    const toastElement = document.getElementById('loadTemplateErrorToast')
+                    toastElement.children[0].children[0].innerHTML = error
                     const toast = new Toast(toastElement)
                     toast.show()
                 }
@@ -719,13 +715,13 @@ export default {
 
                 this.refresh()
 
-                this.toastMessage = "Template node successfully loaded."
-                const toastElement = document.getElementById('successToast')
+                const toastElement = document.getElementById('loadTemplateNodeSuccessToast')
+                toastElement.children[0].children[0].innerHTML = "Template node successfully loaded."
                 const toast = new Toast(toastElement)
                 toast.show()
             } catch (error: any) {
-                this.toastMessage = error
-                const toastElement = document.getElementById('errorToast')
+                const toastElement = document.getElementById('loadTemplateNodeErrorToast')
+                toastElement.children[0].children[0].innerHTML = error
                 const toast = new Toast(toastElement)
                 toast.show()
             }
@@ -742,13 +738,13 @@ export default {
 
                 this.refresh()
 
-                this.toastMessage = "Clinic successfully loaded."
-                const toastElement = document.getElementById('successToast')
+                const toastElement = document.getElementById('klinikSuccessToast')
+                toastElement.children[0].children[0].innerHTML = "Clinic successfully loaded."
                 const toast = new Toast(toastElement)
                 toast.show()
             } catch (error: any) {
-                this.toastMessage = error
-                const toastElement = document.getElementById('errorToast')
+                const toastElement = document.getElementById('klinikErrorToast')
+                toastElement.children[0].children[0].innerHTML = error
                 const toast = new Toast(toastElement)
                 toast.show()
             }
@@ -1359,13 +1355,13 @@ export default {
             this.saved = true; // Mark that the user has attempted to save at least once
             const success = await this.saveForm();
             if (success) {
-                this.toastMessage = this.$t('message.datasetDescriptionAssistant.saveSuccess')
-                const toastElement = document.getElementById('successToast')
+                const toastElement = document.getElementById('saveSuccessToast')
+                toastElement.children[0].children[0].innerHTML = this.$t('message.datasetDescriptionAssistant.saveSuccess')
                 const toast = new Toast(toastElement)
                 toast.show()
             } else {
-                this.toastMessage = this.$t('message.datasetDescriptionAssistant.saveError')
-                const toastElement = document.getElementById('errorToast')
+                const toastElement = document.getElementById('saveErrorToast')
+                toastElement.children[0].children[0].innerHTML = this.$t('message.datasetDescriptionAssistant.saveError')
                 const toast = new Toast(toastElement)
                 toast.show()
             }
@@ -1407,8 +1403,8 @@ export default {
         confirmClear() {
             this.initializeForm();
             this.refresh(); // Force a re-render to reset the form
-            this.toastMessage = this.$t('message.datasetDescriptionAssistant.clearSuccess')
-            const toastElement = document.getElementById('successToast')
+            const toastElement = document.getElementById('clearSuccessToast')
+            toastElement.children[0].children[0].innerHTML = this.$t('message.datasetDescriptionAssistant.clearSuccess')
             const toast = new Toast(toastElement)
             toast.show()
         },
