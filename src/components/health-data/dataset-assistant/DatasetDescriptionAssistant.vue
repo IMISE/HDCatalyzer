@@ -456,6 +456,8 @@ export default {
             datasetCategoriesMap: datasetCategoriesMap,
             category: 0,
             toasts: [
+                { "id": "loadSnapshotSuccessToast", "type": "success" },
+                { "id": "loadSnapshotErrorToast", "type": "danger" },
                 { "id": "createSnapshotErrorToast", "type": "danger" },
                 { "id": "translateErrorToast", "type": "danger" },
                 { "id": "saveTemplateSuccessToast", "type": "success" },
@@ -544,10 +546,30 @@ export default {
         }
 
         if (this.$route.path.includes("snapshot")) {
-            const res = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}${this.$route.path}`)
-            const data = await res.json()
-            this.formData = data
-            this.$router.replace({ path: '/' })
+            try {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}${this.$route.path}`)
+
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                const data = await response.json()
+                this.formData = data
+                this.$router.replace({ path: '/' })
+
+                let toastElement = document.getElementById('loadSnapshotSuccessToast')
+                toastElement.children[0].children[0].innerHTML = "Snapshot successfully loaded."
+                const toast = new Toast(toastElement)
+                toast.show()
+            } catch (error) {
+                this.$router.replace({ path: '/' })
+                this.isComponentReady = true;
+                this.$nextTick(() => this.upsertFakeAccessRightsInput());
+                let toastElement = document.getElementById('loadSnapshotErrorToast')
+                toastElement.children[0].children[0].innerHTML = "Loading snapshot failed. " + error
+                const toast = new Toast(toastElement)
+                toast.show()
+            }
         }
 
         this.isComponentReady = true;
