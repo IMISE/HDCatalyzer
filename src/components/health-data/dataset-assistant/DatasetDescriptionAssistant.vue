@@ -33,7 +33,7 @@ governing permissions and limitations under the Licence.*/
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
             <div class="col-3">
-                <p v-for="c in categories" @click="category = categories.indexOf(c)"
+                <p v-for="c in categories" @click="category = categories.indexOf(c); filterShapes();"
                     :class="'d-flex justify-content-center text-white rounded fw-bold ' + (c === categories[category] ? 'bg-primary' : 'bg-secondary')">
                     {{ c }}
                 </p>
@@ -149,11 +149,12 @@ governing permissions and limitations under the Licence.*/
                     </template>
                 </PillTabs>
                 <div class="d-flex justify-content-end m-4">
-                    <button class="btn btn-secondary me-2" @click="category--; refresh()"
+                    <button class="btn btn-secondary me-2" @click="category--; filterShapes(); refresh();"
                         :disabled="category === 0">Previous</button>
                     <button class="btn btn-primary "
                         :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''"
-                        @click="category++; refresh()" :disabled="category === categories.length - 1">Next</button>
+                        @click="category++; filterShapes(); refresh();"
+                        :disabled="category === categories.length - 1">Next</button>
                 </div>
             </div>
             <div class="col-3">
@@ -414,6 +415,7 @@ export default {
             } as Record<Shape, ShapeRequirement>,
             prefixes: {} as Record<string, string>,
             shapes: {} as Record<Shape, ShapeObject>,
+            originalShapeProperties: [],
             datasetAccessLevels: {} as HealthDcatApSchema['datasetAccessLevels'],
             selectedAccessLevel: localStorage.getItem(
                 'datasetDescriptionAssistantAccessLevel'
@@ -521,6 +523,7 @@ export default {
             .forEach(mapOptionsToSelectObjects);
 
         // Initialize the shapes, prefixes and access levels from the fetched schema
+
         this.shapes = markRaw({
             dataset: datasetShapes,
             distribution: distributionShapes,
@@ -528,7 +531,9 @@ export default {
             analytics: distributionShapes,
         });
 
-        this.sortFormInputs()
+        for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
+            this.originalShapeProperties.push(this.shapes.dataset.properties[i])
+        }
 
         this.prefixes = markRaw(prefixes);
         this.datasetAccessLevels = markRaw(datasetAccessLevels);
@@ -571,6 +576,9 @@ export default {
                 toast.show()
             }
         }
+
+        this.sortFormInputs()
+        this.filterShapes()
 
         this.isComponentReady = true;
         this.$nextTick(() => this.upsertFakeAccessRightsInput());
@@ -769,6 +777,14 @@ export default {
                 toastElement.children[0].children[0].innerHTML = error
                 const toast = new Toast(toastElement)
                 toast.show()
+            }
+        },
+        filterShapes() {
+            this.shapes.dataset.properties = []
+            for (let i = 0; i < this.originalShapeProperties.length; i++) {
+                if (this.datasetCategoriesMap[this.originalShapeProperties[i].path] === this.categories[this.category]) {
+                    this.shapes.dataset.properties.push(this.originalShapeProperties[i])
+                }
             }
         },
         sortFormInputs() {

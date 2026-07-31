@@ -26,90 +26,87 @@ governing permissions and limitations under the Licence.*/
 <template>
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
-            <template v-if="datasetCategoriesMap[prop.path] === categories[category]">
-                <div class="d-flex justify-content-end">
-                    <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)"
-                        id="default-language-select" v-model:items="templates" :model-value="selectedTemplate"
-                        @update:model-value="(template) => selectTemplate(template, prop.path)" />
-                </div>
-                <div v-for="(input, i) in localBucket[prop.path] ?? []"
-                    :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
-                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="position-absolute top-0"
-                        style="right: 150px" id="kliniken-select" :items="kliniken" :model-value="selectedKlinik"
-                        @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
-                    <button
-                        v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
-                        class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
-                        @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
-                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="'Translate'"
-                        :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`"
-                        :disabled="translateLoading">
+            <div class="d-flex justify-content-end">
+                <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)"
+                    id="default-language-select" v-model:items="templates" :model-value="selectedTemplate"
+                    @update:model-value="(template) => selectTemplate(template, prop.path)" />
+            </div>
+            <div v-for="(input, i) in localBucket[prop.path] ?? []"
+                :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
+                <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="position-absolute top-0"
+                    style="right: 150px" id="kliniken-select" :items="kliniken" :model-value="selectedKlinik"
+                    @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
+                <button
+                    v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
+                    class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
+                    @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
+                    data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="'Translate'"
+                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`"
+                    :disabled="translateLoading">
+                    <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                        <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
+                    </svg>
+                </button>
+                <!-- Remove entry button -->
+                <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
+                    class="btn btn-link position-absolute top-0 end-0 px-3" @click="removeEntry(prop, i)"
+                    :aria-label="$t('message.datasetDescriptionAssistant.removeEntryFor')"
+                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
+                    <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                        <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
+                    </svg>
+                </button>
+
+                <!-- Leaf: render a single field -->
+                <DynamicInputField :translateLoading="translateLoading" v-if="!prop.nestedProperties?.length"
+                    class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
+                    :input="prop.input" :multilingual="isMultilingual(prop)"
+                    :readonly="!!prop.hasValue || prop.input.readonly" :required="isRequired(prop, parent, localBucket)"
+                    :date-range="getDateRange(prop, i)" v-model="localBucket[prop.path][i]"
+                    v-model:saved="localSaved" />
+
+                <!-- Container node -->
+                <template v-else>
+                    <!-- If the container accepts an IRI, render an input bound to the container's value -->
+                    <DynamicInputField v-if="prop.input.type && isIri(prop)" class="mb-3"
+                        :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
+                        :input="prop.input" :multilingual="false" :readonly="!!prop.hasValue || prop.input.readonly"
+                        :required="isRequired(prop, parent, localBucket)" v-model="localBucket[prop.path][i]"
+                        v-model:saved="localSaved" />
+
+                    <!-- Otherwise render a blank node label and recurse into children -->
+                    <FauxLabel v-else class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`"
+                        :label="getLocaleText(prop.input.label)" :tooltip="getLocaleText(prop.input.tooltip)"
+                        :usage-note="getLocaleText(prop.input.usageNote)"
+                        :required="isRequired(prop, parent, localBucket)" />
+                    <RecursiveForm class="ms-4 ms-md-5" :id-prefix="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`"
+                        :properties="prop.nestedProperties"
+                        :parent="{ prop, input, isRequired: isRequired(prop, parent, localBucket) }"
+                        :selected-access-level="selectedAccessLevel" :has-any-filled-inputs="hasAnyFilledInputs"
+                        :is-multilingual="isMultilingual" :is-iri="isIri" :is-required="isRequired"
+                        :show-separator="false" v-model:bucket="localBucket[prop.path][i].nestedValues"
+                        v-model:saved="localSaved" @add-another="$emit('add-another', $event)" />
+                </template>
+
+                <!-- Add another entry for this property -->
+                <button v-if="i === localBucket[prop.path].length - 1 && prop.maxCount !== 1"
+                    class="btn btn-link d-flex align-items-center p-0 mb-3"
+                    :id="String(Object.values(prop.buttonLabel ?? {})[0]).replace(/\W+/g, '-').toLowerCase()"
+                    @click="$emit('add-another', { prop, data: localBucket[prop.path] })">
+                    <span class="btn btn-sm ecl-u-bg-primary text-white me-3">
                         <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                            <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
+                            <use xlink:href="@/assets/img/ecl/icons.svg#plus"></use>
                         </svg>
-                    </button>
-                    <!-- Remove entry button -->
-                    <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
-                        class="btn btn-link position-absolute top-0 end-0 px-3" @click="removeEntry(prop, i)"
-                        :aria-label="$t('message.datasetDescriptionAssistant.removeEntryFor')"
-                        :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
-                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                            <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
-                        </svg>
-                    </button>
+                    </span>
+                    <span class="ecl-u-type-color-primary-60">
+                        {{ getLocaleText(prop.buttonLabel) }}
+                    </span>
+                </button>
+            </div>
 
-                    <!-- Leaf: render a single field -->
-                    <DynamicInputField :translateLoading="translateLoading" v-if="!prop.nestedProperties?.length"
-                        class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
-                        :input="prop.input" :multilingual="isMultilingual(prop)"
-                        :readonly="!!prop.hasValue || prop.input.readonly"
-                        :required="isRequired(prop, parent, localBucket)" :date-range="getDateRange(prop, i)"
-                        v-model="localBucket[prop.path][i]" v-model:saved="localSaved" />
-
-                    <!-- Container node -->
-                    <template v-else>
-                        <!-- If the container accepts an IRI, render an input bound to the container's value -->
-                        <DynamicInputField v-if="prop.input.type && isIri(prop)" class="mb-3"
-                            :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
-                            :input="prop.input" :multilingual="false" :readonly="!!prop.hasValue || prop.input.readonly"
-                            :required="isRequired(prop, parent, localBucket)" v-model="localBucket[prop.path][i]"
-                            v-model:saved="localSaved" />
-
-                        <!-- Otherwise render a blank node label and recurse into children -->
-                        <FauxLabel v-else class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`"
-                            :label="getLocaleText(prop.input.label)" :tooltip="getLocaleText(prop.input.tooltip)"
-                            :usage-note="getLocaleText(prop.input.usageNote)"
-                            :required="isRequired(prop, parent, localBucket)" />
-                        <RecursiveForm class="ms-4 ms-md-5"
-                            :id-prefix="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`"
-                            :properties="prop.nestedProperties"
-                            :parent="{ prop, input, isRequired: isRequired(prop, parent, localBucket) }"
-                            :selected-access-level="selectedAccessLevel" :has-any-filled-inputs="hasAnyFilledInputs"
-                            :is-multilingual="isMultilingual" :is-iri="isIri" :is-required="isRequired"
-                            :show-separator="false" v-model:bucket="localBucket[prop.path][i].nestedValues"
-                            v-model:saved="localSaved" @add-another="$emit('add-another', $event)" />
-                    </template>
-
-                    <!-- Add another entry for this property -->
-                    <button v-if="i === localBucket[prop.path].length - 1 && prop.maxCount !== 1"
-                        class="btn btn-link d-flex align-items-center p-0 mb-3"
-                        :id="String(Object.values(prop.buttonLabel ?? {})[0]).replace(/\W+/g, '-').toLowerCase()"
-                        @click="$emit('add-another', { prop, data: localBucket[prop.path] })">
-                        <span class="btn btn-sm ecl-u-bg-primary text-white me-3">
-                            <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                                <use xlink:href="@/assets/img/ecl/icons.svg#plus"></use>
-                            </svg>
-                        </span>
-                        <span class="ecl-u-type-color-primary-60">
-                            {{ getLocaleText(prop.buttonLabel) }}
-                        </span>
-                    </button>
-                </div>
-
-                <!-- TODO: && index < Object.entries(datasetCategoriesMap).filter(([key, value]) => value ===
+            <!-- TODO: && index < Object.entries(datasetCategoriesMap).filter(([key, value]) => value ===
                     categories[category]).length - 1 -->
-                <hr v-if="showSeparator" class="ecl-separator border-secondary opacity-50 mb-3" />
-            </template>
+            <hr v-if="showSeparator" class="ecl-separator border-secondary opacity-50 mb-3" />
         </template>
     </div>
 </template>
