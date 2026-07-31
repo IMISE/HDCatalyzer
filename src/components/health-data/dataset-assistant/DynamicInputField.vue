@@ -40,9 +40,10 @@ governing permissions and limitations under the Licence.*/
     <div v-else-if="input.type === 'datetime'">
         <FormLabel :id="id" :label="getLocaleText(input.label)" :tooltip="getLocaleText(input.tooltip)"
             :usage-note="getLocaleText(input.usageNote)" :required="required" />
-        <!-- TODO! -->
+        <!-- TODO (optional): implement event and error handling  -->
         <!-- <FlatPickr v-model="internalValue.value" :config="flatpickrConfig" :disabled="readonly" :id="id"
             @on-change="onDateTimeChange" @on-close="updateErrorFields" /> -->
+        <input type="datetime-local" v-model="internalValue.value" :disabled="readonly" :id="id" />
 
         <!-- error display -->
         <div v-if="errorFields.length" class="tr-errors">
