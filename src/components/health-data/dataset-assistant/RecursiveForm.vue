@@ -104,9 +104,8 @@ governing permissions and limitations under the Licence.*/
                 </button>
             </div>
 
-            <!-- TODO: && index < Object.entries(datasetCategoriesMap).filter(([key, value]) => value ===
-                    categories[category]).length - 1 -->
-            <hr v-if="showSeparator" class="ecl-separator border-secondary opacity-50 mb-3" />
+            <hr v-if="showSeparator && index < properties.length - 1"
+                class="ecl-separator border-secondary opacity-50 mb-3" />
         </template>
     </div>
 </template>
@@ -144,7 +143,6 @@ export default {
         showSeparator: { type: Boolean, default: true },
         bucket: { type: Object as PropType<DataBucket | undefined>, required: true },
         saved: { type: Boolean, default: false },
-        category: { type: Number },
     },
     data() {
         return {
