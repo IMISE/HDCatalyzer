@@ -32,30 +32,33 @@ governing permissions and limitations under the Licence.*/
                     @update:model-value="(template) => selectTemplate(template, prop.path)" />
             </div>
             <div v-for="(input, i) in localBucket[prop.path] ?? []"
-                :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`" class="position-relative">
-                <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" class="position-absolute top-0"
-                    style="right: 150px" id="kliniken-select" :items="kliniken" :model-value="selectedKlinik"
-                    @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
-                <button
-                    v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
-                    class="btn btn-link position-absolute top-0 px-3" style="right: 50px"
-                    @click="handleTranslate(prop.path, localBucket[prop.path][i])" :aria-label="'Translate'"
-                    data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="'Translate'"
-                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`"
-                    :disabled="translateLoading">
-                    <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                        <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
-                    </svg>
-                </button>
-                <!-- Remove entry button -->
-                <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1"
-                    class="btn btn-link position-absolute top-0 end-0 px-3" @click="removeEntry(prop, i)"
-                    :aria-label="$t('message.datasetDescriptionAssistant.removeEntryFor')"
-                    :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
-                    <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                        <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
-                    </svg>
-                </button>
+                :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`"
+                class="border rounded p-4 mb-4 position-relative">
+                <div class="d-flex align-items-center justify-content-end">
+                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" id="kliniken-select" class="me-4"
+                        :items="kliniken" :model-value="selectedKlinik"
+                        @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
+                    <button
+                        v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1 && input !== localBucket[prop.path][0]"
+                        class="btn btn-link" @click="handleTranslate(prop.path, localBucket[prop.path][i])"
+                        :aria-label="'Translate'" data-bs-toggle="tooltip" data-bs-placement="top"
+                        v-bootstrap-tooltip="'Translate'"
+                        :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`"
+                        :disabled="translateLoading">
+                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                            <use xlink:href="@/assets/img/ecl/icons.svg#book"></use>
+                        </svg>
+                    </button>
+                    <!-- Remove entry button -->
+                    <button v-if="prop.maxCount !== 1 && localBucket[prop.path]?.length > 1" class="btn btn-link"
+                        @click="removeEntry(prop, i)"
+                        :aria-label="$t('message.datasetDescriptionAssistant.removeEntryFor')"
+                        :aria-describedby="`${idPrefix}-${prop.path.replace(':', '-')}-${i}-label`">
+                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                            <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
+                        </svg>
+                    </button>
+                </div>
 
                 <!-- Leaf: render a single field -->
                 <DynamicInputField :translateLoading="translateLoading" v-if="!prop.nestedProperties?.length"
