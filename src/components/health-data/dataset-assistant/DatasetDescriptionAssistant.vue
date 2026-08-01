@@ -33,10 +33,23 @@ governing permissions and limitations under the Licence.*/
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
             <div class="col-3">
-                <p v-for="c in categories" @click="category = categories.indexOf(c);"
-                    :class="'d-flex justify-content-center text-white rounded fw-bold ' + (c === categories[category] ? 'bg-primary' : 'bg-secondary')">
-                    {{ c }}
-                </p>
+                <div v-for="c in categories" @click="category = categories.indexOf(c);" class="container">
+                    <p :class="'row text-white rounded fw-bold ' + progressColor('dataset-mandatory', c)">
+                    <div class="col-6 d-flex align-items-center">
+                        {{ c }}
+                    </div>
+                    <div class="col-3 d-flex align-items-center">
+                        {{ getFieldCountForCategory('dataset-mandatory', c) }}
+                    </div>
+                    <div class="col-3 d-flex align-items-center justify-content-end">
+                        <template v-if="c === categories[category]">
+                            <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                                <use xlink:href="@/assets/img/ecl/icons.svg#log-in-outline"></use>
+                            </svg>
+                        </template>
+                    </div>
+                    </p>
+                </div>
             </div>
             <div class="col-6">
                 <e-c-confirmation-dialog ref="clearDialog" :cancelButton="'message.common.no'"
@@ -829,6 +842,17 @@ export default {
             })
             this.shapes.dataset.properties = sortedDatasetShapes
         },
+        progressColor(tabID: ShapeRequirement, category: string): string {
+            const filledInputs = this.countFilledInputsForCategory(tabID, category)
+            const totalInputs = this.countTotalInputsForCategory(tabID, category)
+            if (filledInputs === totalInputs && totalInputs !== 0) {
+                return 'bg-success'
+            } else if (filledInputs !== 0) {
+                return 'bg-warning'
+            } else {
+                return 'bg-secondary'
+            }
+        },
         capitalize,
         getLocaleText,
         onFormDataChanged() {
@@ -1016,6 +1040,9 @@ export default {
         getFieldCount(tabID: ShapeRequirement): string {
             return `${this.countFilledInputs(tabID)}/${this.countTotalInputs(tabID)}`;
         },
+        getFieldCountForCategory(tabID: ShapeRequirement, category: string): string {
+            return `${this.countFilledInputsForCategory(tabID, category)}/${this.countTotalInputsForCategory(tabID, category)}`;
+        },
         /**
          * Calculates and returns the number of filled inputs for the given tab.
          * @param tabID - The ID of the tab (shape-requirement).
@@ -1026,6 +1053,16 @@ export default {
 
             return this.formData[shape].reduce((acc, bucket) => {
                 const props = this.getPropertiesForRequirement(shape, requirement, bucket);
+                return props.reduce((sum, prop) => {
+                    return sum + this.countFilledLeaves(prop, bucket[prop.path] ?? []);
+                }, acc);
+            }, 0);
+        },
+        countFilledInputsForCategory(tabID: ShapeRequirement, category: string): number {
+            const [shape, requirement] = this.getShapeAndRequirement(tabID);
+
+            return this.formData[shape].reduce((acc, bucket) => {
+                const props = this.getPropertiesForRequirementAndCategory(shape, requirement, category, bucket);
                 return props.reduce((sum, prop) => {
                     return sum + this.countFilledLeaves(prop, bucket[prop.path] ?? []);
                 }, acc);
@@ -1061,6 +1098,16 @@ export default {
 
             return this.formData[shape].reduce((acc, bucket) => {
                 const props = this.getPropertiesForRequirement(shape, requirement, bucket);
+                return props.reduce((sum, prop) => {
+                    return sum + this.countTotalLeaves(prop, bucket[prop.path] ?? []);
+                }, acc);
+            }, 0);
+        },
+        countTotalInputsForCategory(tabID: ShapeRequirement, category: string): number {
+            const [shape, requirement] = this.getShapeAndRequirement(tabID);
+
+            return this.formData[shape].reduce((acc, bucket) => {
+                const props = this.getPropertiesForRequirementAndCategory(shape, requirement, category, bucket);
                 return props.reduce((sum, prop) => {
                     return sum + this.countTotalLeaves(prop, bucket[prop.path] ?? []);
                 }, acc);
@@ -1223,6 +1270,16 @@ export default {
         ): AnyProperty[] {
             return this.shapes[shape].properties.filter(
                 (prop) => this.getEffectiveRequirement(prop, undefined, bucket) === requirement
+            );
+        },
+        getPropertiesForRequirementAndCategory(
+            shape: Shape,
+            requirement: RequirementLevel,
+            category: string,
+            bucket?: DataBucket,
+        ): AnyProperty[] {
+            return this.shapes[shape].properties.filter(
+                (prop) => this.getEffectiveRequirement(prop, undefined, bucket) === requirement && prop.category === category
             );
         },
         /**
