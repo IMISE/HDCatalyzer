@@ -33,7 +33,7 @@ governing permissions and limitations under the Licence.*/
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
             <div class="col-3">
-                <p v-for="c in categories" @click="category = categories.indexOf(c); filterShapes();"
+                <p v-for="c in categories" @click="category = categories.indexOf(c);"
                     :class="'d-flex justify-content-center text-white rounded fw-bold ' + (c === categories[category] ? 'bg-primary' : 'bg-secondary')">
                     {{ c }}
                 </p>
@@ -96,15 +96,21 @@ governing permissions and limitations under the Licence.*/
 
                         <!-- Single bucket for dataset -->
                         <template v-if="pill.id === 'dataset'">
-                            <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
-                                :id-prefix="`${pill.id}-0`" :properties="shapes.dataset.properties"
-                                :selected-access-level="selectedAccessLevel" :has-any-filled-inputs="hasAnyFilledInputs"
-                                :is-multilingual="isMultilingual" :is-iri="isIRI" :is-required="isRequired"
-                                v-model:bucket="formData[pill.id][0]" v-model:saved="saved" :category="category"
-                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
-                                @handle-klinik-select="handleKlinikSelect"
-                                v-model:translateLoading="translateLoading" />
+                            <template v-for="c in categories">
+                                <div v-show="c === categories[category]">
+                                    <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
+                                        :id-prefix="`${pill.id}-0`"
+                                        :properties="shapes.dataset.properties.filter((entry) => entry.category === c)"
+                                        :selected-access-level="selectedAccessLevel"
+                                        :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
+                                        :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
+                                        v-model:saved="saved" :category="category"
+                                        @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
+                                        @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
+                                        @handle-klinik-select="handleKlinikSelect"
+                                        v-model:translateLoading="translateLoading" />
+                                </div>
+                            </template>
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
@@ -154,11 +160,10 @@ governing permissions and limitations under the Licence.*/
                     </template>
                 </PillTabs>
                 <div class="d-flex justify-content-end m-4">
-                    <button class="btn btn-secondary me-2" @click="category--; filterShapes(); refresh();"
+                    <button class="btn btn-secondary me-2" @click="category--;"
                         :disabled="category === 0">Previous</button>
                     <button class="btn btn-primary "
-                        :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''"
-                        @click="category++; filterShapes(); refresh();"
+                        :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''" @click="category++;"
                         :disabled="category === categories.length - 1">Next</button>
                 </div>
             </div>
@@ -803,10 +808,13 @@ export default {
             return includes;
         },
         filterShapes() {
-            this.shapes.dataset.properties = []
-            for (let i = 0; i < this.originalShapeProperties.length; i++) {
-                if (this.datasetCategoriesMap[this.originalShapeProperties[i].path] === this.categories[this.category]) {
-                    this.shapes.dataset.properties.push(this.originalShapeProperties[i])
+
+            for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
+                this.datasetCategoriesMap[this.shapes.dataset.properties[i]]
+                for (let j = 0; j < this.categories.length; j++) {
+                    if (this.datasetCategoriesMap[this.shapes.dataset.properties[i].path] === this.categories[j]) {
+                        this.shapes.dataset.properties[i].category = this.categories[j]
+                    }
                 }
             }
         },
