@@ -27,8 +27,8 @@ governing permissions and limitations under the Licence.*/
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
             <div class="d-flex justify-content-end">
-                <TemplateDropdownSelect v-if="orders.dataset[selectedAccessLevel].includes(prop.path)"
-                    id="default-language-select" v-model:items="templates" :model-value="selectedTemplate"
+                <TemplateDropdownSelect v-if="prop.category !== undefined" id="default-language-select"
+                    v-model:items="templates" :model-value="selectedTemplate"
                     @update:model-value="(template) => selectTemplate(template, prop.path)" />
             </div>
             <div v-for="(input, i) in localBucket[prop.path] ?? []"
