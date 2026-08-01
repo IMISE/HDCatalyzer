@@ -35,19 +35,19 @@ governing permissions and limitations under the Licence.*/
             <div class="col-3">
                 <div v-for="c in categories" @click="category = categories.indexOf(c);" class="container">
                     <p :class="'row text-white rounded fw-bold ' + progressColor('dataset-mandatory', c)">
-                    <div class="col-6 d-flex align-items-center">
-                        {{ c }}
-                    </div>
-                    <div class="col-3 d-flex align-items-center">
-                        {{ getFieldCountForCategory('dataset-mandatory', c) }}
-                    </div>
-                    <div class="col-3 d-flex align-items-center justify-content-end">
-                        <template v-if="c === categories[category]">
-                            <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                                <use xlink:href="@/assets/img/ecl/icons.svg#log-in-outline"></use>
-                            </svg>
-                        </template>
-                    </div>
+                        <span class="col-6 d-flex align-items-center">
+                            {{ c }}
+                        </span>
+                        <span class="col-3 d-flex align-items-center">
+                            {{ getFieldCountForCategory('dataset-mandatory', c) }}
+                        </span>
+                        <span class="col-3 d-flex align-items-center justify-content-end">
+                            <template v-if="c === categories[category]">
+                                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                                    <use xlink:href="@/assets/img/ecl/icons.svg#log-in-outline"></use>
+                                </svg>
+                            </template>
+                        </span>
                     </p>
                 </div>
             </div>
