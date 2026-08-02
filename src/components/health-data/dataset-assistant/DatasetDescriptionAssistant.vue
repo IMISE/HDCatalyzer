@@ -174,7 +174,7 @@ governing permissions and limitations under the Licence.*/
                     </template>
                 </PillTabs>
                 <div class="d-flex justify-content-end m-4">
-                    <button class="btn btn-secondary me-2" @click="category--; scrollToTop();"
+                    <button class="btn btn-outline-primary me-2" @click="category--; scrollToTop();"
                         :disabled="category === 0">Previous</button>
                     <button class="btn btn-primary "
                         :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''"
