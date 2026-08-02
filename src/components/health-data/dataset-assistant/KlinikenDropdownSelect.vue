@@ -53,9 +53,9 @@ governing permissions and limitations under the Licence.*/
             </button>
 
             <ul class="dropdown-menu" :aria-labelledby="id">
-                <li v-for="item in items" :key="item._id">
+                <li v-for="item in items" :key="item['STOID']">
                     <a class="dropdown-item" href="#" @click.prevent="updateSelected(item)">
-                        {{ item['Name'] }}
+                        {{ `Bundesland: ${item['Land']}, Klinik: ${item['Name']}` }}
                     </a>
                 </li>
             </ul>
@@ -102,5 +102,10 @@ export default {
 <style scoped>
 .material-icons {
     font-size: 0.975rem;
+}
+
+.dropdown-menu {
+    height: 500px;
+    overflow-y: auto;
 }
 </style>
