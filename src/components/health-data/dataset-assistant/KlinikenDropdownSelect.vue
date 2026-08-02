@@ -53,9 +53,14 @@ governing permissions and limitations under the Licence.*/
             </button>
 
             <ul class="dropdown-menu" :aria-labelledby="id">
-                <li v-for="item in items" :key="item['STOID']">
+                <li class="d-flex align-items-center bg-white border-bottom p-4 sticky-top">
+                    <label class="me-2" for="klinikSearch">Filter</label>
+                    <input name="klinikSearch" type="text" @input="event => filterText = event.target.value">
+                </li>
+                <li v-for="item in items.filter((entry) => entry['Name'].toLowerCase().includes(filterText.toLowerCase()))"
+                    :key="item['STOID']">
                     <a class="dropdown-item" href="#" @click.prevent="updateSelected(item)">
-                        {{ `Bundesland: ${item['Land']}, Klinik: ${item['Name']}` }}
+                        {{ `${item['Name']} (Bundesland: ${item['Land']})` }}
                     </a>
                 </li>
             </ul>
@@ -80,6 +85,7 @@ export default {
         return {
             isOpen: false,
             items: [],
+            filterText: "",
         };
     },
     methods: {
@@ -93,7 +99,18 @@ export default {
         async handleOpen() {
             const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/kliniken`)
             const data = await response.json()
-            this.items = data
+            const sortedData = data.sort((a: any, b: any) => {
+                const nameA = a['Name'].toUpperCase(); // ignore upper and lowercase
+                const nameB = b['Name'].toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                return 0;
+            })
+            this.items = sortedData
         }
     },
 };
@@ -105,7 +122,15 @@ export default {
 }
 
 .dropdown-menu {
+    padding-top: 0px;
+    width: 500px;
     height: 500px;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.dropdown-item {
+    white-space: normal;
+    word-break: break-word;
 }
 </style>
