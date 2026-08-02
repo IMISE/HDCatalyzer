@@ -33,7 +33,8 @@ governing permissions and limitations under the Licence.*/
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
             <div class="col-3">
-                <div v-for="c in categories" @click="category = categories.indexOf(c);" class="container">
+                <div v-for="c in categories" @click="category = categories.indexOf(c); scrollToTop();"
+                    class="container">
                     <p :class="'row text-white rounded fw-bold ' + progressColor('dataset-mandatory', c)">
                         <span class="col-6 d-flex align-items-center">
                             {{ c }}
@@ -110,7 +111,7 @@ governing permissions and limitations under the Licence.*/
                         <!-- Single bucket for dataset -->
                         <template v-if="pill.id === 'dataset'">
                             <template v-for="c in categories">
-                                <div v-show="c === categories[category]">
+                                <template v-if="c === categories[category]">
                                     <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
                                         :id-prefix="`${pill.id}-0`"
                                         :properties="shapes.dataset.properties.filter((entry) => entry.category === c)"
@@ -122,7 +123,7 @@ governing permissions and limitations under the Licence.*/
                                         @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
                                         @handle-klinik-select="handleKlinikSelect"
                                         v-model:translateLoading="translateLoading" />
-                                </div>
+                                </template>
                             </template>
                         </template>
 
@@ -173,11 +174,11 @@ governing permissions and limitations under the Licence.*/
                     </template>
                 </PillTabs>
                 <div class="d-flex justify-content-end m-4">
-                    <button class="btn btn-secondary me-2" @click="category--;"
+                    <button class="btn btn-secondary me-2" @click="category--; scrollToTop();"
                         :disabled="category === 0">Previous</button>
                     <button class="btn btn-primary "
-                        :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''" @click="category++;"
-                        :disabled="category === categories.length - 1">Next</button>
+                        :style="category === categories.length - 1 ? 'cursor: not-allowed;' : ''"
+                        @click="category++; scrollToTop();" :disabled="category === categories.length - 1">Next</button>
                 </div>
             </div>
             <div class="col-3">
@@ -630,6 +631,11 @@ export default {
         },
     },
     methods: {
+        scrollToTop() {
+            this.$nextTick(() =>
+                window.scrollTo(0, 0)
+            );
+        },
         async handleSnapshot() {
             const uuid = crypto.randomUUID()
             try {
