@@ -610,6 +610,25 @@ export default {
         },
     },
     methods: {
+        createSlug(text: string) {
+            // Remove any non-word character
+            text = text.replace(/[^a-z^A-Z^0-9]/g, ' ')
+
+            // Replace any whitespace with a single whitespace
+            text = text.replace(/\s+/g, ' ')
+
+            text = text.trim()
+
+            // Replace all single whitespaces with underscores
+            text = text.replaceAll(' ', '_')
+
+            const date = new Date()
+            const day = date.getDate()
+            const month = date.getMonth() + 1
+            const year = date.getFullYear()
+
+            return `${year}-${month}-${day}_${text}`
+        },
         handleFileUpload(payload: Event) {
             const file = payload.target.files[0]
             const reader = new FileReader();
@@ -632,8 +651,18 @@ export default {
         },
         async handleSnapshot() {
             const uuid = crypto.randomUUID()
+            let title = this.formData.dataset[0]['dct:title'][0].value
+
+            if (title === "") {
+                alert("Please provide a title.")
+                return;
+            }
+
+            let slug = this.createSlug(title)
+            slug += "_" + uuid
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/snapshot/${uuid}`, {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/snapshot/${slug}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -645,9 +674,9 @@ export default {
                     throw new Error(`Response status: ${response.status}`);
                 }
 
-                navigator.clipboard.writeText(`${window.location.origin}/snapshot/${uuid}`)
+                navigator.clipboard.writeText(`${window.location.origin}/snapshot/${slug}`)
 
-                alert(`Snapshot created successfully. You can access it under:\n\n${window.location.origin}/snapshot/${uuid}\n\nThe link was saved to your clipboard.`)
+                alert(`Snapshot created successfully. You can access it under:\n\n${window.location.origin}/snapshot/${slug}\n\nThe link was saved to your clipboard.`)
             } catch (error: any) {
                 let toastElement = document.getElementById('createSnapshotErrorToast')
                 toastElement.children[0].children[0].innerHTML = error
@@ -1644,8 +1673,17 @@ export default {
                 }
             }
 
+            let title = this.formData.dataset[0]['dct:title'][0].value
+
+            if (title === "") {
+                alert("Please provide a title.")
+                return;
+            }
+
+            const filename = this.createSlug(title)
+
             // Download the serialized data as a text file
-            downloadTextFile('dataset.' + format, rdfData, mime);
+            downloadTextFile(`${filename}.${format}`, rdfData, mime);
             this.toastMessage = this.$t('message.datasetDescriptionAssistant.exportSuccess')
             const successToast = document.getElementById('successToast')
             const toast = new Toast(successToast)
