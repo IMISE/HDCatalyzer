@@ -60,37 +60,6 @@ governing permissions and limitations under the Licence.*/
                 <TemplateDialog :mode="templateDialogMode" ref="templateDialog" :cancelButton="'message.common.no'"
                     :confirmButton="'message.common.yes'" @confirm="handleTemplate" />
 
-                <!-- Validation Errors -->
-                <section v-if="validationErrors.length || validationWarnings.length" class="mb-3"
-                    id="validation-errors">
-                    <template v-for="error in validationErrors" :key="error.id">
-                        <ErrorNotification v-if="filterValidationMessages(error)" :header="error.description"
-                            @close="handleCloseError(error.id)">
-                            <div v-if="error.test" class="ecl-notification__description">
-                                <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ error.test }}
-                            </div>
-                            <div v-if="error.location" class="ecl-notification__description">
-                                <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
-                                {{ error.location }}
-                            </div>
-                        </ErrorNotification>
-                    </template>
-
-                    <template v-for="warning in validationWarnings" :key="warning.id">
-                        <WarningNotification v-if="filterValidationMessages(warning)" :header="warning.description"
-                            @close="handleCloseWarning(warning.id)">
-                            <div v-if="warning.test" class="ecl-notification__description">
-                                <strong>{{ $t('message.datasetDescriptionAssistant.test') }}:</strong> {{ warning.test
-                                }}
-                            </div>
-                            <div v-if="warning.location" class="ecl-notification__description">
-                                <strong>{{ $t('message.datasetDescriptionAssistant.location') }}:</strong>
-                                {{ warning.location }}
-                            </div>
-                        </WarningNotification>
-                    </template>
-                </section>
-
                 <PillTabs class="mb-3" :tabs="pills" v-model:active-tab="activePill">
                     <!-- Pill Label -->
                     <template #tab-label="{ tab: pill }: { tab: ShapeTab }">
@@ -110,21 +79,18 @@ governing permissions and limitations under the Licence.*/
 
                         <!-- Single bucket for dataset -->
                         <template v-if="pill.id === 'dataset'">
-                            <template v-for="c in categories">
-                                <template v-if="c === categories[category]">
-                                    <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
-                                        :id-prefix="`${pill.id}-0`"
-                                        :properties="shapes.dataset.properties.filter((entry) => entry.category === c)"
-                                        :selected-access-level="selectedAccessLevel"
-                                        :has-any-filled-inputs="hasAnyFilledInputs" :is-multilingual="isMultilingual"
-                                        :is-iri="isIRI" :is-required="isRequired" v-model:bucket="formData[pill.id][0]"
-                                        v-model:saved="saved" :category="category"
-                                        @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
-                                        @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
-                                        @handle-klinik-select="handleKlinikSelect"
-                                        v-model:translateLoading="translateLoading" />
-                                </template>
-                            </template>
+                            <RecursiveForm class="ecl-u-shadow-1 bg-white ecl-u-border-radius-8 p-4 pb-2"
+                                :id-prefix="`${pill.id}-0`"
+                                :properties="shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
+                                :selected-access-level="selectedAccessLevel" :has-any-filled-inputs="hasAnyFilledInputs"
+                                :is-multilingual="isMultilingual" :is-iri="isIRI" :is-required="isRequired"
+                                v-model:bucket="formData[pill.id][0]" v-model:saved="saved" :category="category"
+                                @add-another="({ prop, data }) => handleAddAnotherInput(prop, data)"
+                                @handleTemplateNode="handleTemplateNode" @handleTranslate="translate"
+                                @handle-klinik-select="handleKlinikSelect" v-model:translateLoading="translateLoading"
+                                :filterValidationMessages="filterValidationMessages"
+                                :handleCloseError="handleCloseError" :handleCloseWarning="handleCloseWarning"
+                                :validationErrors="validationErrors" :validationWarnings="validationWarnings" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->
@@ -808,7 +774,7 @@ export default {
                 toast.show()
             }
         },
-        filterValidationMessages(message: any) {
+        filterValidationMessages(message: any, prop: any) {
             const messageParts = message.location.split("/")
             const lastPart = messageParts[messageParts.length - 1]
             let lastText = lastPart.replace("]", "")
@@ -817,14 +783,7 @@ export default {
                 lastText = lastText.split("#")[1]
             }
 
-            let includes = false;
-            for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
-                if (this.shapes.dataset.properties[i].path.includes(lastText)) {
-                    includes = true
-                }
-            }
-
-            return includes;
+            return prop.path.includes(lastText) && this.datasetCategoriesMap[prop.path] === this.categories[this.category]
         },
         filterShapes() {
 

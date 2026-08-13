@@ -26,6 +26,39 @@ governing permissions and limitations under the Licence.*/
 <template>
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
+            <!-- Validation Errors -->
+            <section v-if="validationErrors.length || validationWarnings.length" class="mb-3" id="validation-errors">
+                <template v-for="error in validationErrors" :key="error.id">
+                    <ErrorNotification v-if="filterValidationMessages(error, prop)" :header="error.description"
+                        @close="handleCloseError(error.id)">
+                        <div v-if="error.test" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.test')
+                            }}:</strong> {{ error.test }}
+                        </div>
+                        <div v-if="error.location" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.location')
+                            }}:</strong>
+                            {{ error.location }}
+                        </div>
+                    </ErrorNotification>
+                </template>
+
+                <template v-for="warning in validationWarnings" :key="warning.id">
+                    <WarningNotification v-if="filterValidationMessages(warning, prop)" :header="warning.description"
+                        @close="handleCloseWarning(warning.id)">
+                        <div v-if="warning.test" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.test')
+                            }}:</strong> {{ warning.test
+                                }}
+                        </div>
+                        <div v-if="warning.location" class="ecl-notification__description">
+                            <strong>{{ $t('message.datasetDescriptionAssistant.location')
+                            }}:</strong>
+                            {{ warning.location }}
+                        </div>
+                    </WarningNotification>
+                </template>
+            </section>
             <div class="d-flex justify-content-end">
                 <TemplateDropdownSelect v-if="prop.category !== undefined" id="default-language-select"
                     v-model:items="templates" :model-value="selectedTemplate"
@@ -118,14 +151,16 @@ import type { PropType } from 'vue';
 import DynamicInputField from './DynamicInputField.vue';
 import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
-import type { AccessLevel, AnyProperty, DataBucket, PropertyContext, ShapeInput } from './types';
+import type { AccessLevel, AnyProperty, DataBucket, ITBValidationError, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
 import { orders, categories, datasetCategoriesMap, klinikenPaths } from '@/utils/sortUtil'
 import KlinikenDropdownSelect from './KlinikenDropdownSelect.vue';
+import ErrorNotification from '../common/notifications/ErrorNotification.vue';
+import WarningNotification from '../common/notifications/WarningNotification.vue';
 
 export default {
     name: 'RecursiveForm',
-    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect, KlinikenDropdownSelect },
+    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect, KlinikenDropdownSelect, ErrorNotification, WarningNotification },
     props: {
         idPrefix: { type: String, required: true },
         properties: { type: Array as PropType<AnyProperty[]>, required: true },
@@ -146,6 +181,11 @@ export default {
         showSeparator: { type: Boolean, default: true },
         bucket: { type: Object as PropType<DataBucket | undefined>, required: true },
         saved: { type: Boolean, default: false },
+        filterValidationMessages: { type: Function },
+        handleCloseError: { type: Function },
+        handleCloseWarning: { type: Function },
+        validationErrors: { default: [] },
+        validationWarnings: { default: [] },
     },
     data() {
         return {
