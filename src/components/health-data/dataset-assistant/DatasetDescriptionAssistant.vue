@@ -244,6 +244,11 @@ governing permissions and limitations under the Licence.*/
                             </a>
                         </li>
                     </ul>
+
+                    <div class="border rounded mt-2 p-4">
+                        <label for="fileUpload" class="mb-4">Import dataset</label>
+                        <input type="file" id="fileUpload" @change="handleFileUpload" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -434,6 +439,14 @@ export default {
                     // transform: jsonLdToRdfXml,
                     //endpoint: '/rdf/convert/rdf-xml',
                 },
+                jsonld: {
+                    label: 'JSON-LD',
+                    mime: 'application/ld+json'
+                },
+                json: {
+                    label: 'JSON',
+                    mime: 'application/json'
+                }
             },
             formData: {} as Record<Shape, DataBucket[]>,
             isComponentReady: false,
@@ -597,6 +610,21 @@ export default {
         },
     },
     methods: {
+        handleFileUpload(payload: Event) {
+            const file = payload.target.files[0]
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    this.formData = JSON.parse(reader.result)
+                } catch (error) {
+                    alert(error)
+                }
+            };
+            reader.onerror = () => {
+                alert("Error reading the file. Please try again.");
+            };
+            reader.readAsText(file);
+        },
         scrollToTop() {
             this.$nextTick(() =>
                 window.scrollTo(0, 0)
@@ -1588,22 +1616,33 @@ export default {
             if (!this.supportedFormats[format]) return console.warn('Unknown export format:', format);
 
             //if (this.isAuthenticated) await this.saveForm();
-            const jsonLd = this.buildJsonLd();
+
+            let rdfData = "";
             const { mime } = this.supportedFormats[format];
 
-            // @ts-ignore-next-line
-            const rdf = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/convert`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "content": JSON.stringify(jsonLd),
-                    "type": mime
-                })
-            });
+            if (format === 'json') {
+                rdfData = JSON.stringify(this.formData)
+            } else {
+                const jsonLd = this.buildJsonLd();
 
-            const rdfData = await rdf.text()
+                if (format === 'jsonld') {
+                    rdfData = JSON.stringify(jsonLd);
+                } else {
+                    // @ts-ignore-next-line
+                    const rdf = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/convert`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "content": JSON.stringify(jsonLd),
+                            "type": mime
+                        })
+                    });
+
+                    rdfData = await rdf.text()
+                }
+            }
 
             // Download the serialized data as a text file
             downloadTextFile('dataset.' + format, rdfData, mime);
