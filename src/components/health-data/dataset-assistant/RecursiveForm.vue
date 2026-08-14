@@ -33,11 +33,11 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseError(error.id)">
                         <div v-if="error.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                            }}:</strong> {{ error.test }}
+                                }}:</strong> {{ error.test }}
                         </div>
                         <div v-if="error.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                            }}:</strong>
+                                }}:</strong>
                             {{ error.location }}
                         </div>
                     </ErrorNotification>
@@ -48,12 +48,12 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseWarning(warning.id)">
                         <div v-if="warning.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                            }}:</strong> {{ warning.test
+                                }}:</strong> {{ warning.test
                                 }}
                         </div>
                         <div v-if="warning.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                            }}:</strong>
+                                }}:</strong>
                             {{ warning.location }}
                         </div>
                     </WarningNotification>
@@ -153,7 +153,7 @@ import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
 import type { AccessLevel, AnyProperty, DataBucket, ITBValidationError, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
-import { orders, categories, datasetCategoriesMap, klinikenPaths } from '@/utils/sortUtil'
+import { orders, datasetCategoriesMap, klinikenPaths } from '@/utils/sortUtil'
 import KlinikenDropdownSelect from './KlinikenDropdownSelect.vue';
 import ErrorNotification from '../common/notifications/ErrorNotification.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
@@ -194,7 +194,6 @@ export default {
             isDropdownOpen: false,
             orders: orders,
             translateLoading: false,
-            categories: categories,
             datasetCategoriesMap: datasetCategoriesMap,
             selectedKlinik: "",
             kliniken: [],

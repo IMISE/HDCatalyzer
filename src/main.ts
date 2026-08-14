@@ -30,7 +30,7 @@ const env = app.config.globalProperties.$env;
 // const LOCALE = env.languages.locale;
 // const FALLBACKLOCALE = env.languages.fallbackLocale;
 
-const LOCALE = 'en'
+const LOCALE = 'de'
 const FALLBACKLOCALE = 'en'
 
 app.use(createPinia())

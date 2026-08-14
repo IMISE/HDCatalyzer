@@ -271,7 +271,7 @@ import PillTabs from '../common/tabs/PillTabs.vue';
 import RecursiveForm from './RecursiveForm.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
 import UtilService from '@/services/utilService';
-import { orders, categories, datasetCategoriesMap } from '@/utils/sortUtil'
+import { orders, datasetCategoriesMap } from '@/utils/sortUtil'
 import {
     cloneDeepAndPrune,
     generateUniqueID,
@@ -457,7 +457,7 @@ export default {
             templateDialogMode: "",
             toastMessage: "",
             translateLoading: false,
-            categories: categories,
+            categories: [...new Set(Array.from(Object.values(datasetCategoriesMap)))],
             datasetCategoriesMap: datasetCategoriesMap,
             category: 0,
             toasts: [
