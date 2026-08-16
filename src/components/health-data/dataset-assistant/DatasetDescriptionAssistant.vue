@@ -147,107 +147,152 @@ governing permissions and limitations under the Licence.*/
                         @click="category++; scrollToTop();" :disabled="category === categories.length - 1">Next</button>
                 </div>
             </div>
-            <div class="col-3">
-                <!-- Context -->
-                <Accordion background-class="ecl-u-bg-primary-10 mb-4">
-                    <AccordionItem class="no-accent" heading-level="h2">
-                        <template #title>
-                            <span class="text-primary-dark fw-bolder fs-5">
-                                {{ $t('message.datasetDescriptionAssistant.context.title') }}
-                            </span>
-                        </template>
-                        <!-- <section>
+            <div class="col-3" style="height: 0px; position: sticky; top: 1.5rem;">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+                            type="button" role="tab" aria-controls="home" aria-selected="true"
+                            @click="activeNavTab = 'actions'">Actions</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                            type="button" role="tab" aria-controls="profile" aria-selected="false"
+                            @click="activeNavTab = 'details'">Details</button>
+                    </li>
+                </ul>
+                <div class="tab-content border-start border-bottom border-end p-4 overflow-y-auto"
+                    style="height: 750px;" id="myTabContent">
+                    <div v-if="activeNavTab === 'actions'" class="tab-pane fade show active" id="actions"
+                        role="tabpanel" aria-labelledby="actions-tab">
+                        <!-- Context -->
+                        <Accordion background-class="ecl-u-bg-primary-10 mb-4">
+                            <AccordionItem class="no-accent" heading-level="h2">
+                                <template #title>
+                                    <span class="text-primary-dark fw-bolder fs-5">
+                                        {{ $t('message.datasetDescriptionAssistant.context.title') }}
+                                    </span>
+                                </template>
+                                <!-- <section>
                     <template v-for="paragraph in contextParagraphs">
                         <p v-html="paragraph" />
                     </template>
                 </section> -->
-                    </AccordionItem>
-                </Accordion>
+                            </AccordionItem>
+                        </Accordion>
 
-                <!-- Access Level Information -->
-                <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3"
-                    id="accessLevelInfo">
-                    <div v-for="level in accessLevels">
-                        <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
+                        <!-- Access Level Information -->
+                        <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3"
+                            id="accessLevelInfo">
+                            <div v-for="level in accessLevels">
+                                <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-primary">
+                            <!-- Access Level Selection -->
+                            <DropdownSelect class="d-flex align-items-center ecl-u-mr-2xl" id="access-level-select"
+                                :label="$t('message.datasetDescriptionAssistant.accessLevel')"
+                                :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')"
+                                :items="accessLevelItems"
+                                :variant="datasetAccessLevels[selectedAccessLevel].backgroundColor"
+                                :model-value="selectedAccessLevel" @update:model-value="updateAccessLevel" />
+
+                            <!-- Default Language Selection -->
+                            <DropdownSelect class="d-flex align-items-center mt-4" id="default-language-select"
+                                :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
+                                :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="mb-3">
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot"
+                                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                                    " @click="handleSnapshot">Create Snapshot
+                            </button>
+
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
+                                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                                    " @click="openTemplateDialog('save')">Save Template
+                            </button>
+
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
+                                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                                    " @click="openTemplateDialog('load')">Load Template
+                            </button>
+
+                            <!-- Save button with tooltip when disabled -->
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button"
+                                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
+                                    " :disabled="true" @click="handleSave">
+                                {{ $t('message.datasetDescriptionAssistant.save') }}
+                            </button>
+
+                            <!-- Clear button -->
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="clear-button"
+                                @click="handleClear">
+                                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                                    <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
+                                </svg>
+                                {{ $t('message.datasetDescriptionAssistant.clear') }}
+                            </button>
+
+                            <!-- Validate button with tooltip when disabled -->
+                            <!-- TODO: add :disabled="!isAuthenticated" -->
+                            <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button"
+                                data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
+                                    " @click="handleValidate">
+                                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                                    <use xlink:href="@/assets/img/ecl/icons.svg#check"></use>
+                                </svg>
+                                {{ $t('message.datasetDescriptionAssistant.validate') }}
+                            </button>
+
+                            <!-- Export button -->
+                            <button class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle"
+                                id="export-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
+                                    <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
+                                </svg>
+                                {{ $t('message.datasetDescriptionAssistant.export') }}
+                            </button>
+                            <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="export-button">
+                                <li v-for="(format, key) of supportedFormats" :key="key">
+                                    <a class="dropdown-item" :id="`export-${key}`" :href="key"
+                                        @click.prevent="handleExport">
+                                        {{ format.label }}
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="border rounded mt-2 p-4">
+                                <label for="fileUpload" class="mb-4">Import dataset</label>
+                                <input type="file" id="fileUpload" @change="handleFileUpload" />
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="alert alert-primary">
-                    <!-- Access Level Selection -->
-                    <DropdownSelect class="d-flex align-items-center ecl-u-mr-2xl" id="access-level-select"
-                        :label="$t('message.datasetDescriptionAssistant.accessLevel')"
-                        :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')"
-                        :items="accessLevelItems" :variant="datasetAccessLevels[selectedAccessLevel].backgroundColor"
-                        :model-value="selectedAccessLevel" @update:model-value="updateAccessLevel" />
-
-                    <!-- Default Language Selection -->
-                    <DropdownSelect class="d-flex align-items-center mt-4" id="default-language-select"
-                        :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
-                        :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
-                </div>
-
-                <!-- Buttons -->
-                <div class="mb-3">
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot"
-                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                            " @click="handleSnapshot">Create Snapshot
-                    </button>
-
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
-                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                            " @click="openTemplateDialog('save')">Save Template
-                    </button>
-
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
-                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                            " @click="openTemplateDialog('load')">Load Template
-                    </button>
-
-                    <!-- Save button with tooltip when disabled -->
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-button" data-bs-toggle="tooltip"
-                        data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                            " :disabled="true" @click="handleSave">
-                        {{ $t('message.datasetDescriptionAssistant.save') }}
-                    </button>
-
-                    <!-- Clear button -->
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="clear-button" @click="handleClear">
-                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                            <use xlink:href="@/assets/img/ecl/icons.svg#trash"></use>
-                        </svg>
-                        {{ $t('message.datasetDescriptionAssistant.clear') }}
-                    </button>
-
-                    <!-- Validate button with tooltip when disabled -->
-                    <!-- TODO: add :disabled="!isAuthenticated" -->
-                    <button class="ecl-button ecl-button--primary fw-bold m-2" id="validate-button"
-                        data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!canValidate ? $t('message.datasetDescriptionAssistant.validateTooltip') : ''
-                            " @click="handleValidate">
-                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                            <use xlink:href="@/assets/img/ecl/icons.svg#check"></use>
-                        </svg>
-                        {{ $t('message.datasetDescriptionAssistant.validate') }}
-                    </button>
-
-                    <!-- Export button -->
-                    <button class="ecl-button ecl-button--primary fw-bold m-2 me-0 dropdown-toggle" id="export-button"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
-                            <use xlink:href="@/assets/img/ecl/icons.svg#external"></use>
-                        </svg>
-                        {{ $t('message.datasetDescriptionAssistant.export') }}
-                    </button>
-                    <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="export-button">
-                        <li v-for="(format, key) of supportedFormats" :key="key">
-                            <a class="dropdown-item" :id="`export-${key}`" :href="key" @click.prevent="handleExport">
-                                {{ format.label }}
-                            </a>
-                        </li>
-                    </ul>
-
-                    <div class="border rounded mt-2 p-4">
-                        <label for="fileUpload" class="mb-4">Import dataset</label>
-                        <input type="file" id="fileUpload" @change="handleFileUpload" />
+                    <div v-if="activeNavTab === 'details'" class="tab-pane fade show active" id="details"
+                        role="tabpanel" aria-labelledby="details-tab">
+                        <div v-for="(shape, index) in shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
+                            :class="'p-2 ' + (index % 2 === 0 ? 'bg-light' : '')" @click="scrollToInput(shape.path)">
+                            <strong>{{ `${shape.input.label[defaultLanguage]}
+                                (${formData.dataset[0][shape.path].length})`
+                                }}</strong>
+                            <div v-for="content in formData.dataset[0][shape.path]">
+                                <div v-if="formData.dataset[0][shape.path].length > 1">{{ `[${content.lang}]
+                                    ${content.value}` }}</div>
+                                <div v-if="content.value === '' && !content.nestedValues">
+                                    <svg v-if="shape.requirement[selectedAccessLevel] === 'mandatory'"
+                                        class="ecl-icon ecl-icon--m me-2 text-danger" focusable="false"
+                                        aria-hidden="true">
+                                        <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
+                                    </svg>
+                                    <svg v-else class="ecl-icon ecl-icon--m me-2 text-warning" focusable="false"
+                                        aria-hidden="true">
+                                        <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -476,6 +521,8 @@ export default {
                 { "id": "saveErrorToast", "type": "danger" },
                 { "id": "clearSuccessToast", "type": "success" },
             ],
+            activeNavTab: 'actions',
+            formDataDetails: {},
         };
     },
     async created() {
@@ -610,6 +657,15 @@ export default {
         },
     },
     methods: {
+        scrollToInput(path: string) {
+            const text = path.replace(':', '-')
+            const element = document.getElementById(`dataset-0-${text}-0`)
+            element?.scrollIntoView({
+                behavior: 'auto',
+                block: 'center',
+                inline: 'center'
+            })
+        },
         createSlug(text: string) {
             // Remove any non-word character
             text = text.replace(/[^a-z^A-Z^0-9]/g, ' ')
