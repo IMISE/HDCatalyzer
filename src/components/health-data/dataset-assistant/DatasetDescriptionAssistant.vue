@@ -32,7 +32,7 @@ governing permissions and limitations under the Licence.*/
     </template> -->
     <div v-if="isComponentReady" class="m-4">
         <div class="row">
-            <div class="col-3">
+            <div class="col-3 sticky-top" style="height: 0px; top: 1.5rem">
                 <div v-for="c in categories" @click="category = categories.indexOf(c); scrollToTop();"
                     class="container">
                     <p :class="'row text-white rounded fw-bold ' + progressColor('dataset-mandatory', c)">
@@ -40,7 +40,9 @@ governing permissions and limitations under the Licence.*/
                             {{ c }}
                         </span>
                         <span class="col-3 d-flex align-items-center">
-                            {{ getFieldCountForCategory('dataset-mandatory', c) }}
+                            {{ countTotalInputsForCategory('dataset-mandatory', c) !== 0 ?
+                                `${countFilledInputsForCategory('dataset-mandatory',
+                                    c)}/${countTotalInputsForCategory('dataset-mandatory', c)}` : '' }}
                         </span>
                         <span class="col-3 d-flex align-items-center justify-content-end">
                             <template v-if="c === categories[category]">
@@ -160,7 +162,7 @@ governing permissions and limitations under the Licence.*/
                             @click="activeNavTab = 'details'">Details</button>
                     </li>
                 </ul>
-                <div class="tab-content border-start border-bottom border-end p-4 overflow-y-auto"
+                <div :class="'tab-content border-start border-bottom border-end overflow-y-auto ' + (activeNavTab === 'actions' ? 'p-4' : '')"
                     style="height: 750px;" id="myTabContent">
                     <div v-if="activeNavTab === 'actions'" class="tab-pane fade show active" id="actions"
                         role="tabpanel" aria-labelledby="actions-tab">
@@ -272,27 +274,11 @@ governing permissions and limitations under the Licence.*/
                     </div>
                     <div v-if="activeNavTab === 'details'" class="tab-pane fade show active" id="details"
                         role="tabpanel" aria-labelledby="details-tab">
-                        <div v-for="(shape, index) in shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
-                            :class="'p-2 ' + (index % 2 === 0 ? 'bg-light' : '')" @click="scrollToInput(shape.path)">
-                            <strong>{{ `${shape.input.label[defaultLanguage]}
-                                (${formData.dataset[0][shape.path].length})`
-                                }}</strong>
-                            <div v-for="content in formData.dataset[0][shape.path]">
-                                <div v-if="formData.dataset[0][shape.path].length > 1">{{ `[${content.lang}]
-                                    ${content.value}` }}</div>
-                                <div v-if="content.value === '' && !content.nestedValues">
-                                    <svg v-if="shape.requirement[selectedAccessLevel] === 'mandatory'"
-                                        class="ecl-icon ecl-icon--m me-2 text-danger" focusable="false"
-                                        aria-hidden="true">
-                                        <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
-                                    </svg>
-                                    <svg v-else class="ecl-icon ecl-icon--m me-2 text-warning" focusable="false"
-                                        aria-hidden="true">
-                                        <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                        <RecursiveDetails
+                            :properties="shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
+                            :defaultLanguage="defaultLanguage" :datasetEntries="formData.dataset[0]"
+                            :selectedAccessLevel="selectedAccessLevel" :isChild="false"
+                            @handleScrollToInput="scrollToInput" />
                     </div>
                 </div>
             </div>
@@ -344,6 +330,7 @@ import type {
 import { Toast } from 'bootstrap'
 import { downloadTextFile } from '@/utils/rdfGenerator.ts';
 import CustomToast from './CustomToast.vue';
+import RecursiveDetails from './RecursiveDetails.vue';
 const multilingualInputTypes = new Set(['text', 'textarea']);
 
 export default {
@@ -361,6 +348,7 @@ export default {
         WarningNotification,
         TemplateDialog,
         CustomToast,
+        RecursiveDetails,
     },
     head() {
         return {
@@ -657,13 +645,30 @@ export default {
         },
     },
     methods: {
+        getPathToFirstInputByShape(shape: any, paths: any[]) {
+            paths.push(shape.path)
+            if (shape?.nestedProperties) {
+                this.getPathToFirstInputByShape(shape.nestedProperties[0], paths)
+            }
+
+            return paths;
+        },
         scrollToInput(path: string) {
-            const text = path.replace(':', '-')
-            const element = document.getElementById(`dataset-0-${text}-0`)
+            const shape = this.shapes.dataset.properties.filter((entry) => entry.path === path)[0]
+
+            const paths = this.getPathToFirstInputByShape(shape, [])
+
+            let text = 'dataset-0'
+            paths.forEach((path) => {
+                path = path.replaceAll(':', '-')
+                text += `-${path}-0`
+            })
+
+            const element = document.getElementById(text)
             element?.scrollIntoView({
-                behavior: 'auto',
-                block: 'center',
-                inline: 'center'
+                behavior: "smooth",
+                block: "center",
+                inline: "center"
             })
         },
         createSlug(text: string) {
@@ -927,6 +932,8 @@ export default {
                 return 'bg-success'
             } else if (filledInputs !== 0) {
                 return 'bg-warning'
+            } else if (filledInputs === 0 && totalInputs !== 0) {
+                return 'bg-danger'
             } else {
                 return 'bg-secondary'
             }
@@ -1117,9 +1124,6 @@ export default {
          */
         getFieldCount(tabID: ShapeRequirement): string {
             return `${this.countFilledInputs(tabID)}/${this.countTotalInputs(tabID)}`;
-        },
-        getFieldCountForCategory(tabID: ShapeRequirement, category: string): string {
-            return `${this.countFilledInputsForCategory(tabID, category)}/${this.countTotalInputsForCategory(tabID, category)}`;
         },
         /**
          * Calculates and returns the number of filled inputs for the given tab.
