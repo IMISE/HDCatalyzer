@@ -518,8 +518,8 @@ export default {
             templateDialogMode: "",
             toastMessage: "",
             translateLoading: false,
-            categories: [...new Set(Array.from(Object.values(datasetCategoriesMap)))],
-            datasetCategoriesMap: datasetCategoriesMap,
+            categories: [],
+            datasetCategoriesMap: [],
             category: 0,
             toasts: [
                 { "id": "loadSnapshotSuccessToast", "type": "success" },
@@ -542,6 +542,7 @@ export default {
         };
     },
     async created() {
+
         /**
          * Maps options to the correct format for the select inputs.
          * @param prop - The property to map options for select inputs.
@@ -597,10 +598,6 @@ export default {
             analytics: distributionShapes,
         });
 
-        for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
-            this.originalShapeProperties.push(this.shapes.dataset.properties[i])
-        }
-
         this.prefixes = markRaw(prefixes);
         this.datasetAccessLevels = markRaw(datasetAccessLevels);
         this.selectedAccessLevel ??= getTypedKeys(datasetAccessLevels)[0];
@@ -643,6 +640,9 @@ export default {
             }
         }
 
+        this.datasetCategoriesMap = await this.getCategoriesMap()
+        this.categories = [...new Set(Array.from(Object.values(this.datasetCategoriesMap)))]
+
         this.sortFormInputs()
         this.filterShapes()
 
@@ -673,6 +673,20 @@ export default {
         },
     },
     methods: {
+        async getCategoriesMap() {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/categories`)
+
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                const data = await response.json()
+                return data
+            } catch (error) {
+                return datasetCategoriesMap
+            }
+        },
         getPathToFirstInputByShape(shape: any, paths: any[]) {
             paths.push(shape.path)
             if (shape?.nestedProperties) {
