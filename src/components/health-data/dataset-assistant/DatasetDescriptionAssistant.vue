@@ -274,11 +274,39 @@ governing permissions and limitations under the Licence.*/
                     </div>
                     <div v-if="activeNavTab === 'details'" class="tab-pane fade show active" id="details"
                         role="tabpanel" aria-labelledby="details-tab">
-                        <RecursiveDetails
-                            :properties="shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
-                            :defaultLanguage="defaultLanguage" :datasetEntries="formData.dataset[0]"
-                            :selectedAccessLevel="selectedAccessLevel" :isChild="false"
-                            @handleScrollToInput="scrollToInput" />
+                        <template v-if="activePill === 'dataset'">
+                            <RecursiveDetails
+                                :properties="shapes.dataset.properties.filter((entry) => entry.category === categories[category])"
+                                :defaultLanguage="defaultLanguage" :datasetEntries="formData.dataset[0]"
+                                :selectedAccessLevel="selectedAccessLevel" :isChild="false"
+                                @handleScrollToInput="scrollToInput" />
+                        </template>
+                        <template v-else>
+                            <div class="accordion" id="detailsAccordion">
+                                <div v-for="(item, index) in formData[activePill].length" class="accordion-item">
+                                    <h2 class="accordion-header" :id="'heading' + index">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            :data-bs-target="'#collapse' + index" aria-expanded="true"
+                                            :aria-controls="'collapse' + index">
+                                            {{`${pills.filter(entry => entry.id === activePill)[0].label} #${index +
+                                                1}`}}
+                                        </button>
+                                    </h2>
+                                    <div :id="'collapse' + index" class="accordion-collapse collapse show"
+                                        :aria-labelledby="'heading' + index">
+                                        <div class=" accordion-body">
+                                            <RecursiveDetails :properties="shapes[activePill].properties"
+                                                :defaultLanguage="defaultLanguage"
+                                                :datasetEntries="formData[activePill][index]"
+                                                :selectedAccessLevel="selectedAccessLevel" :isChild="false"
+                                                @handleScrollToInput="scrollToInput" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+
                     </div>
                 </div>
             </div>
