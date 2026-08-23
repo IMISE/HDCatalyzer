@@ -163,7 +163,7 @@ governing permissions and limitations under the Licence.*/
                     </li>
                 </ul>
                 <div :class="'tab-content border-start border-bottom border-end overflow-y-auto ' + (activeNavTab === 'actions' ? 'p-4' : '')"
-                    style="height: 750px;" id="myTabContent">
+                    style="height: 80vh;" id="myTabContent">
                     <div v-if="activeNavTab === 'actions'" class="tab-pane fade show active" id="actions"
                         role="tabpanel" aria-labelledby="actions-tab">
                         <!-- Context -->
@@ -192,7 +192,7 @@ governing permissions and limitations under the Licence.*/
 
                         <div class="alert alert-primary">
                             <!-- Access Level Selection -->
-                            <DropdownSelect class="d-flex align-items-center ecl-u-mr-2xl" id="access-level-select"
+                            <DropdownSelect class="d-flex flex-wrap align-items-center ecl-u-mr-2xl" id="access-level-select"
                                 :label="$t('message.datasetDescriptionAssistant.accessLevel')"
                                 :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')"
                                 :items="accessLevelItems"
@@ -200,7 +200,7 @@ governing permissions and limitations under the Licence.*/
                                 :model-value="selectedAccessLevel" @update:model-value="updateAccessLevel" />
 
                             <!-- Default Language Selection -->
-                            <DropdownSelect class="d-flex align-items-center mt-4" id="default-language-select"
+                            <DropdownSelect class="d-flex flex-wrap align-items-center mt-4" id="default-language-select"
                                 :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
                                 :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
                         </div>
