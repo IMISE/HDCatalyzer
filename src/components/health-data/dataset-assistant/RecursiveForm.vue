@@ -153,7 +153,7 @@ import FauxLabel from '../common/FauxLabel.vue';
 import { getLocaleText } from '@/utils/generalUtils';
 import type { AccessLevel, AnyProperty, DataBucket, ITBValidationError, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
-import { orders, datasetCategoriesMap, klinikenPaths } from '@/utils/sortUtil'
+import { orders, klinikenPaths } from '@/utils/sortUtil'
 import KlinikenDropdownSelect from './KlinikenDropdownSelect.vue';
 import ErrorNotification from '../common/notifications/ErrorNotification.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
@@ -194,7 +194,6 @@ export default {
             isDropdownOpen: false,
             orders: orders,
             translateLoading: false,
-            datasetCategoriesMap: datasetCategoriesMap,
             selectedKlinik: "",
             kliniken: [],
             klinikenPaths: klinikenPaths,

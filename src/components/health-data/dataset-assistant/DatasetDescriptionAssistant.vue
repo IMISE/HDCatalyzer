@@ -641,7 +641,7 @@ export default {
         }
 
         this.datasetCategoriesMap = await this.getCategoriesMap()
-        this.categories = [...new Set(Array.from(Object.values(this.datasetCategoriesMap)))]
+        this.categories = [...new Set(Array.from(Object.values(this.datasetCategoriesMap).map((item => item.name))))]
 
         this.sortFormInputs()
         this.filterShapes()
@@ -943,14 +943,13 @@ export default {
                 lastText = lastText.split("#")[1]
             }
 
-            return prop.path.includes(lastText) && this.datasetCategoriesMap[prop.path] === this.categories[this.category]
+            return prop.path.includes(lastText) && this.datasetCategoriesMap[prop.path].name === this.categories[this.category]
         },
         filterShapes() {
 
             for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
-                this.datasetCategoriesMap[this.shapes.dataset.properties[i]]
                 for (let j = 0; j < this.categories.length; j++) {
-                    if (this.datasetCategoriesMap[this.shapes.dataset.properties[i].path] === this.categories[j]) {
+                    if (this.datasetCategoriesMap[this.shapes.dataset.properties[i].path].name === this.categories[j]) {
                         this.shapes.dataset.properties[i].category = this.categories[j]
                     }
                 }
