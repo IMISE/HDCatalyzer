@@ -26,6 +26,8 @@ governing permissions and limitations under the Licence.*/
 <template>
     <div>
         <template v-for="(prop, index) in properties" :key="`${idPrefix}-${prop.path}-${index}`">
+            <!-- DEBUG -->
+            <!-- {{ prop.path }} -->
             <!-- Validation Errors -->
             <section v-if="validationErrors.length || validationWarnings.length" class="mb-3" id="validation-errors">
                 <template v-for="error in validationErrors" :key="error.id">
@@ -33,11 +35,11 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseError(error.id)">
                         <div v-if="error.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                                }}:</strong> {{ error.test }}
+                            }}:</strong> {{ error.test }}
                         </div>
                         <div v-if="error.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                                }}:</strong>
+                            }}:</strong>
                             {{ error.location }}
                         </div>
                     </ErrorNotification>
@@ -48,12 +50,12 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseWarning(warning.id)">
                         <div v-if="warning.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                                }}:</strong> {{ warning.test
+                            }}:</strong> {{ warning.test
                                 }}
                         </div>
                         <div v-if="warning.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                                }}:</strong>
+                            }}:</strong>
                             {{ warning.location }}
                         </div>
                     </WarningNotification>

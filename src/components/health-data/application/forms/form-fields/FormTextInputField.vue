@@ -38,6 +38,11 @@ governing permissions and limitations under the Licence.*/
         :placeholder="placeholder" :required="required"
         :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
         v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" :disabled="translateLoading" />
+      <input v-else-if="type === 'tel'" class="ecl-text-input flex"
+        :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :type="type"
+        :placeholder="placeholder" :required="required"
+        :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
+        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" :disabled="translateLoading" />
       <textarea v-else-if="type === 'textarea'" class="ecl-text-area flex-grow-1"
         :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :placeholder="placeholder" rows="4"
         :required="required"
