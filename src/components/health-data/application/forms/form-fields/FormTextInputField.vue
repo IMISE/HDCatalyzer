@@ -33,12 +33,7 @@ governing permissions and limitations under the Licence.*/
     <AlertAdditionalInfo v-if="additionalInformation?.length > 0" :message="$t('message.application.form.editField')" />
 
     <div class="d-flex align-items-center" :class="{ 'multilingual-container': multilingual }">
-      <input v-if="type !== 'tel' && type !== 'textarea'" class="ecl-text-input flex-grow-1"
-        :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :type="type"
-        :placeholder="placeholder" :required="required"
-        :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
-        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" :disabled="translateLoading" />
-      <input v-else-if="type === 'tel'" class="ecl-text-input flex"
+      <input v-if="type === 'tel' || type === 'date' || type === 'number'" class="ecl-text-input flex"
         :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }" :id="id" :type="type"
         :placeholder="placeholder" :required="required"
         :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
@@ -49,6 +44,10 @@ governing permissions and limitations under the Licence.*/
         :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
         v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)"
         :disabled="translateLoading"></textarea>
+      <input v-else class="ecl-text-input flex-grow-1" :class="{ 'is-invalid': getErrorMessage.length > 0 && !touched }"
+        :id="id" :type="type" :placeholder="placeholder" :required="required"
+        :readonly="readonly && (additionalInformation?.length === 0 && !enabledBasedOnParentCondition)"
+        v-model="localModelValue" @input="updateValue" @blur="$emit('blur', $event)" :disabled="translateLoading" />
 
       <!-- Language selector -->
       <div v-if="multilingual"

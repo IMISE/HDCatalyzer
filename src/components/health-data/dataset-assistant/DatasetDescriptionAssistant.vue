@@ -646,11 +646,20 @@ export default {
         this.sortFormInputs()
         this.filterShapes()
 
+        // Reduce input size
         for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
             if (this.shapes.dataset.properties[i].path === 'dct:publisher' ||
                 this.shapes.dataset.properties[i].path === 'geodcatap:custodian' ||
                 this.shapes.dataset.properties[i].path === 'healthdcatap:hdab') {
                 this.shapes.dataset.properties[i].nestedProperties[2].nestedProperties[2].input.type = 'tel'
+            }
+
+            if (this.shapes.dataset.properties[i].path === 'healthdcatap:numberOfUniqueIndividuals' ||
+                this.shapes.dataset.properties[i].path === 'healthdcatap:numberOfRecords' ||
+                this.shapes.dataset.properties[i].path === 'healthdcatap:minTypicalAge' ||
+                this.shapes.dataset.properties[i].path === 'healthdcatap:maxTypicalAge'
+            ) {
+                this.shapes.dataset.properties[i].input.type = 'number'
             }
         }
 
