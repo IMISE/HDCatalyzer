@@ -192,15 +192,16 @@ governing permissions and limitations under the Licence.*/
 
                         <div class="alert alert-primary">
                             <!-- Access Level Selection -->
-                            <DropdownSelect class="d-flex flex-wrap align-items-center ecl-u-mr-2xl" id="access-level-select"
-                                :label="$t('message.datasetDescriptionAssistant.accessLevel')"
+                            <DropdownSelect class="d-flex flex-wrap align-items-center ecl-u-mr-2xl"
+                                id="access-level-select" :label="$t('message.datasetDescriptionAssistant.accessLevel')"
                                 :tooltip="$t('message.datasetDescriptionAssistant.accessLevelTooltip')"
                                 :items="accessLevelItems"
                                 :variant="datasetAccessLevels[selectedAccessLevel].backgroundColor"
                                 :model-value="selectedAccessLevel" @update:model-value="updateAccessLevel" />
 
                             <!-- Default Language Selection -->
-                            <DropdownSelect class="d-flex flex-wrap align-items-center mt-4" id="default-language-select"
+                            <DropdownSelect class="d-flex flex-wrap align-items-center mt-4"
+                                id="default-language-select"
                                 :label="$t('message.datasetDescriptionAssistant.defaultLanguage')" :items="languages"
                                 :model-value="defaultLanguage" @update:model-value="updateDefaultLanguage" />
                         </div>
@@ -974,7 +975,7 @@ export default {
         },
         sortFormInputs() {
             let sortedDatasetShapes: any = []
-            orders.dataset['non-public'].forEach((entry) => {
+            orders.dataset.forEach((entry) => {
                 this.shapes.dataset.properties.forEach((shape) => {
                     if (shape.path === entry) {
                         sortedDatasetShapes.push(shape)
