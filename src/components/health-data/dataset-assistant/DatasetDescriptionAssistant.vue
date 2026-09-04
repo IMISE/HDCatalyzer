@@ -35,8 +35,8 @@ governing permissions and limitations under the Licence.*/
             <div class="col-3 sticky-top" style="height: 0px; top: 1.5rem">
                 <div v-for="c in categories" @click="category = categories.indexOf(c); scrollToTop();"
                     class="container">
-                    <p :class="'row text-white rounded fw-bold ' + progressColor('dataset-mandatory', c)">
-                        <span class="col-6 d-flex align-items-center">
+                    <p class="row rounded fw-bold border">
+                        <span class="col-5 d-flex align-items-center">
                             {{ c }}
                         </span>
                         <span class="col-3 d-flex align-items-center">
@@ -44,7 +44,29 @@ governing permissions and limitations under the Licence.*/
                                 `${countFilledInputsForCategory('dataset-mandatory',
                                     c)}/${countTotalInputsForCategory('dataset-mandatory', c)}` : '' }}
                         </span>
-                        <span class="col-3 d-flex align-items-center justify-content-end">
+                        <span class="col-2 d-flex align-items-center">
+                            <svg v-if="progressColor('dataset-mandatory', c) === 'text-success'"
+                                class="ecl-icon ecl-icon--m me-2" :class="progressColor('dataset-mandatory', c)"
+                                focusable="false" aria-hidden="true">
+                                <use xlink:href="@/assets/img/ecl/icons.svg#check-filled"></use>
+                            </svg>
+                            <svg v-if="progressColor('dataset-mandatory', c) === 'text-warning'"
+                                class="ecl-icon ecl-icon--m me-2" :class="progressColor('dataset-mandatory', c)"
+                                focusable="false" aria-hidden="true">
+                                <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
+                            </svg>
+                            <svg v-if="progressColor('dataset-mandatory', c) === 'text-danger'"
+                                class="ecl-icon ecl-icon--m me-2" :class="progressColor('dataset-mandatory', c)"
+                                focusable="false" aria-hidden="true">
+                                <use xlink:href="@/assets/img/ecl/icons.svg#warning"></use>
+                            </svg>
+                            <svg v-if="progressColor('dataset-mandatory', c) === 'text-secondary'"
+                                class="ecl-icon ecl-icon--m me-2" :class="progressColor('dataset-mandatory', c)"
+                                focusable="false" aria-hidden="true">
+                                <use xlink:href="@/assets/img/ecl/icons.svg#information"></use>
+                            </svg>
+                        </span>
+                        <span class="col-2 d-flex align-items-center justify-content-end">
                             <template v-if="c === categories[category]">
                                 <svg class="ecl-icon ecl-icon--m me-2" focusable="false" aria-hidden="true">
                                     <use xlink:href="@/assets/img/ecl/icons.svg#log-in-outline"></use>
@@ -988,13 +1010,13 @@ export default {
             const filledInputs = this.countFilledInputsForCategory(tabID, category)
             const totalInputs = this.countTotalInputsForCategory(tabID, category)
             if (filledInputs === totalInputs && totalInputs !== 0) {
-                return 'bg-success'
+                return 'text-success'
             } else if (filledInputs !== 0) {
-                return 'bg-warning'
+                return 'text-warning'
             } else if (filledInputs === 0 && totalInputs !== 0) {
-                return 'bg-danger'
+                return 'text-danger'
             } else {
-                return 'bg-secondary'
+                return 'text-secondary'
             }
         },
         capitalize,
