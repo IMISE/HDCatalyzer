@@ -1,6 +1,10 @@
 services:
   webapp:
-    build: .
+    build:
+      context: .
+      args:
+        - VITE_DDA_PROXY_URL=${VITE_DDA_PROXY_URL}
+        - WEBAPP_PORT=${WEBAPP_PORT}
     ports: 
-      - "3000:80"
+      - "${WEBAPP_PORT:-80}:80"
     restart: unless-stopped
