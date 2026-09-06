@@ -951,9 +951,17 @@ export default {
             try {
                 this.formData.dataset[0][path].forEach(element => {
                     if (element._uid === input._uid) {
-                        element.nestedValues['foaf:name'][0].value = klinik['Name']
-                        element.nestedValues['foaf:homepage'][0].value = klinik['URL']
-                        element.nestedValues['foaf:mbox'][0].value = klinik['EMail']
+
+                        if (element.nestedValues['cv:contactPoint']) {
+                            element.nestedValues['foaf:name'][0].value = klinik['Name']
+                            element.nestedValues['cv:contactPoint'][0].nestedValues['cv:email'][0].value = klinik['EMail']
+                            element.nestedValues['cv:contactPoint'][0].nestedValues['cv:contactPage'][0].value = klinik['URL']
+                            element.nestedValues['cv:contactPoint'][0].nestedValues['cv:telephone'][0].value = klinik['Telefon']
+                        } else {
+                            element.nestedValues['foaf:name'][0].value = klinik['Name']
+                            element.nestedValues['foaf:homepage'][0].value = klinik['URL']
+                            element.nestedValues['foaf:mbox'][0].value = klinik['EMail']
+                        }
                     }
                 });
 
