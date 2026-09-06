@@ -42,7 +42,7 @@ governing permissions and limitations under the Licence.*/
                     'show.bs.dropdown': () => (isOpen = true),
                 }" @click="handleOpen">
                 <div class="d-flex justify-content-between align-items-center">
-                    Load node template
+                    Vorlagenausschnitt laden
                     <div class="d-flex align-items-center ms-1 px-2 fs-5">
                         <svg class="ecl-icon ecl-icon--fluid ecl-button__icon ecl-button__icon--after"
                             :class="{ 'ecl-icon--rotate-180': !isOpen }" focusable="false" aria-hidden="true">

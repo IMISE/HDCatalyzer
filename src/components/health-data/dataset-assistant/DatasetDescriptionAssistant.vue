@@ -498,7 +498,6 @@ export default {
             } as Record<Shape, ShapeRequirement>,
             prefixes: {} as Record<string, string>,
             shapes: {} as Record<Shape, ShapeObject>,
-            originalShapeProperties: [],
             datasetAccessLevels: {} as HealthDcatApSchema['datasetAccessLevels'],
             selectedAccessLevel: localStorage.getItem(
                 'datasetDescriptionAssistantAccessLevel'
@@ -690,6 +689,8 @@ export default {
             }
         }
 
+        this.replaceOpeningHours()
+
         this.isComponentReady = true;
         this.$nextTick(() => this.upsertFakeAccessRightsInput());
     },
@@ -717,6 +718,23 @@ export default {
         },
     },
     methods: {
+        replaceOpeningHours() {
+
+            // Enter some value so it counts as a filled input
+            this.formData.dataset[0]['healthdcatap:hdab'][0].nestedValues['cv:contactPoint'][0].nestedValues['cv:openingHours'][0].nestedValues['dct:description'][0].value = '-'
+
+            for (let i = 0; i < this.shapes.dataset.properties.length; i++) {
+
+                if (this.shapes.dataset.properties[i].path === 'healthdcatap:hdab') {
+                    // Remove special opening hours
+                    this.shapes.dataset.properties[i].nestedProperties[2].nestedProperties.splice(4, 1)
+
+                    this.shapes.dataset.properties[i].nestedProperties[2].nestedProperties[3].nestedProperties.splice(1, 1)
+                    this.shapes.dataset.properties[i].nestedProperties[2].nestedProperties[3].nestedProperties[0].input.type = 'opening_hours'
+                    this.shapes.dataset.properties[i].nestedProperties[2].nestedProperties[3].nestedProperties[0].maxCount = 1
+                }
+            }
+        },
         async getCategoriesMap() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/categories`)

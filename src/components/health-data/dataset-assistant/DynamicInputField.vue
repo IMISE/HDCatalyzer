@@ -34,6 +34,7 @@ governing permissions and limitations under the Licence.*/
             :required="required" :model-value="internalValue.value === 'true'"
             @update:model-value="internalValue.value = $event ? 'true' : required ? 'false' : ''" />
     </div>
+    <OpeningHours v-else-if="input.type === 'opening_hours'" />
     <TemporalResolutionInputField v-else-if="datatype === 'xsd:duration'" :id="id" :label="getLocaleText(input.label)"
         :tooltip="getLocaleText(input.tooltip)" :usage-note="getLocaleText(input.usageNote)" :error-fields="errorFields"
         :readonly="readonly" :required="required" v-model="internalValue.value" @blur="updateErrorFields" />
@@ -73,6 +74,7 @@ import TemporalResolutionInputField from '@/components/health-data/dataset-assis
 import { getLocaleText } from '@/utils/generalUtils';
 import type { ErrorFields } from '../application/commonTypes';
 import type { InputOptions, ShapeInput } from './types';
+import OpeningHours from './OpeningHours.vue';
 
 type InternalInput = Omit<ShapeInput, 'nestedValues' | '_uid'> & { key: string };
 
@@ -85,6 +87,7 @@ export default {
         FormSelectInputField,
         FormTextInputField,
         TemporalResolutionInputField,
+        OpeningHours
     },
     props: {
         id: { type: String, required: true },
