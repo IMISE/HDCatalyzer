@@ -196,11 +196,11 @@ governing permissions and limitations under the Licence.*/
                                         {{ $t('message.datasetDescriptionAssistant.context.title') }}
                                     </span>
                                 </template>
-                                <!-- <section>
-                    <template v-for="paragraph in contextParagraphs">
-                        <p v-html="paragraph" />
-                    </template>
-                </section> -->
+                                <section>
+                                    <template v-for="paragraph in contextParagraphs">
+                                        <p v-html="paragraph" />
+                                    </template>
+                                </section>
                             </AccordionItem>
                         </Accordion>
 
@@ -467,13 +467,9 @@ export default {
         },
         contextParagraphs(): string[] {
             return [
-                this.localDOMPurify.sanitize(
-                    this.$t('message.datasetDescriptionAssistant.context.paragraph1', {
-                        spec: `<a href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/latest/" class="ecl-link" target="_blank">HealthDCAT-AP ${this.$t(
-                            'message.datasetDescriptionAssistant.context.specification'
-                        )}</a>`,
-                    })
-                ),
+                this.$t('message.datasetDescriptionAssistant.context.paragraph1', {
+                    spec: `HealthDCAT-AP ${this.$t('message.datasetDescriptionAssistant.context.specification')}`,
+                }),
                 this.$t('message.datasetDescriptionAssistant.context.paragraph2'),
                 this.$t('message.datasetDescriptionAssistant.context.paragraph3'),
             ];
