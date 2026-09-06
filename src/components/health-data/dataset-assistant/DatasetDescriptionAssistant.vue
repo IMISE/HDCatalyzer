@@ -962,6 +962,7 @@ export default {
 
                         if (element.nestedValues['cv:contactPoint']) {
                             element.nestedValues['foaf:name'][0].value = klinik['Name']
+                            element.nestedValues['dct:type'][0].value = 'https://hdeu-dcat.acceptance.data.health.europa.eu/resource/authority/publisher-type/inpatient-institute'
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:email'][0].value = klinik['EMail']
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:contactPage'][0].value = klinik['URL']
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:telephone'][0].value = klinik['Telefon']
