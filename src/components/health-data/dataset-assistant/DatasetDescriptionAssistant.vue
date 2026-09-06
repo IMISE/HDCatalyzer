@@ -176,41 +176,23 @@ governing permissions and limitations under the Licence.*/
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
                             type="button" role="tab" aria-controls="home" aria-selected="true"
-                            @click="activeNavTab = 'actions'">Actions</button>
+                            @click="activeNavTab = 'actions'">Aktionen</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
                             type="button" role="tab" aria-controls="profile" aria-selected="false"
                             @click="activeNavTab = 'details'">Details</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                            type="button" role="tab" aria-controls="profile" aria-selected="false"
+                            @click="activeNavTab = 'info'">Info</button>
+                    </li>
                 </ul>
-                <div :class="'tab-content border-start border-bottom border-end overflow-y-auto ' + (activeNavTab === 'actions' ? 'p-4' : '')"
+                <div :class="'tab-content border-start border-bottom border-end overflow-y-auto ' + (activeNavTab === 'actions' || activeNavTab === 'info' ? 'p-4' : '')"
                     style="height: 80vh;" id="myTabContent">
                     <div v-if="activeNavTab === 'actions'" class="tab-pane fade show active" id="actions"
                         role="tabpanel" aria-labelledby="actions-tab">
-                        <!-- Context -->
-                        <Accordion background-class="ecl-u-bg-primary-10 mb-4">
-                            <AccordionItem class="no-accent" heading-level="h2">
-                                <template #title>
-                                    <span class="text-primary-dark fw-bolder fs-5">
-                                        {{ $t('message.datasetDescriptionAssistant.context.title') }}
-                                    </span>
-                                </template>
-                                <section>
-                                    <template v-for="paragraph in contextParagraphs">
-                                        <p v-html="paragraph" />
-                                    </template>
-                                </section>
-                            </AccordionItem>
-                        </Accordion>
-
-                        <!-- Access Level Information -->
-                        <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3"
-                            id="accessLevelInfo">
-                            <div v-for="level in accessLevels">
-                                <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
-                            </div>
-                        </div>
 
                         <div class="alert alert-primary">
                             <!-- Access Level Selection -->
@@ -232,17 +214,17 @@ governing permissions and limitations under the Licence.*/
                         <div class="mb-3">
                             <button class="ecl-button ecl-button--primary fw-bold m-2" id="create-snapshot"
                                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                                    " @click="handleSnapshot">Create Snapshot
+                                    " @click="handleSnapshot">Snapshot erstellen
                             </button>
 
                             <button class="ecl-button ecl-button--primary fw-bold m-2" id="save-template-modal-toggle"
                                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                                    " @click="openTemplateDialog('save')">Save Template
+                                    " @click="openTemplateDialog('save')">Vorlage speichern
                             </button>
 
                             <button class="ecl-button ecl-button--primary fw-bold m-2" id="load-template-button"
                                 data-bs-toggle="tooltip" data-bs-placement="top" v-bootstrap-tooltip="!isAuthenticated ? $t('message.datasetDescriptionAssistant.saveTooltip') : ''
-                                    " @click="openTemplateDialog('load')">Load Template
+                                    " @click="openTemplateDialog('load')">Vorlage laden
                             </button>
 
                             <!-- Save button with tooltip when disabled -->
@@ -290,7 +272,7 @@ governing permissions and limitations under the Licence.*/
                             </ul>
 
                             <div class="border rounded mt-2 p-4">
-                                <label for="fileUpload" class="mb-4">Import dataset</label>
+                                <label for="fileUpload" class="mb-4">Datensatz importieren</label>
                                 <input type="file" id="fileUpload" @change="handleFileUpload" />
                             </div>
                         </div>
@@ -330,6 +312,32 @@ governing permissions and limitations under the Licence.*/
                         </template>
 
 
+                    </div>
+                    <div v-if="activeNavTab === 'info'" class="tab-pane fade show active" id="info" role="tabpanel"
+                        aria-labelledby="actions-tab">
+                        <!-- Context -->
+                        <Accordion background-class="ecl-u-bg-primary-10 mb-4">
+                            <AccordionItem class="no-accent" heading-level="h2">
+                                <template #title>
+                                    <span class="text-primary-dark fw-bolder fs-5">
+                                        {{ $t('message.datasetDescriptionAssistant.context.title') }}
+                                    </span>
+                                </template>
+                                <section>
+                                    <template v-for="paragraph in contextParagraphs">
+                                        <p v-html="paragraph" />
+                                    </template>
+                                </section>
+                            </AccordionItem>
+                        </Accordion>
+
+                        <!-- Access Level Information -->
+                        <div class="ecl-u-shadow-1 ecl-u-bg-primary-10 ecl-u-border-radius-8 mb-4 px-4 py-3"
+                            id="accessLevelInfo">
+                            <div v-for="level in accessLevels">
+                                <strong :class="level.color">{{ level.label }}:</strong> {{ level.description }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
