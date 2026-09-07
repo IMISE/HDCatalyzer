@@ -7,7 +7,7 @@ defineEmits(['handleScrollToInput'])
 <template>
     <div v-for="(shape, index) in properties"
         :class="'p-2 ' + (!isChild ? (index % 2 === 0 ? 'bg-light' : 'bg-light-darker') : '')"
-        @click="$emit('handleScrollToInput', shape.path)">
+        @click="$emit('handleScrollToInput', shape.path)" style="cursor: pointer;">
         <strong v-if="shape.input.label">{{ shape.input.label[defaultLanguage] }}</strong>
         <div class="border rounded p-2 mb-1" v-for="input in datasetEntries[shape.path]">
             <div v-if="input.value === '' && !input.nestedValues">
