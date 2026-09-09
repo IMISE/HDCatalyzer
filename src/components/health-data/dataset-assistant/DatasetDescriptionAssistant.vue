@@ -40,9 +40,7 @@ governing permissions and limitations under the Licence.*/
                             {{ c }}
                         </span>
                         <span class="col-3 d-flex align-items-center">
-                            {{ countTotalInputsForCategory('dataset-mandatory', c) !== 0 ?
-                                `${countFilledInputsForCategory('dataset-mandatory',
-                                    c)}/${countTotalInputsForCategory('dataset-mandatory', c)}` : '' }}
+                            {{ getInputsForCategory(c) }}
                         </span>
                         <span class="col-2 d-flex align-items-center">
                             <svg v-if="progressColor('dataset-mandatory', c) === 'text-success'"
@@ -718,6 +716,11 @@ export default {
         },
     },
     methods: {
+        getInputsForCategory(category: any) {
+            return this.countTotalInputsForCategory('dataset-mandatory', category) !== 0 ?
+                `${this.countFilledInputsForCategory('dataset-mandatory',
+                    category)}/${this.countTotalInputsForCategory('dataset-mandatory', category)}` : ''
+        },
         replaceOpeningHours() {
 
             // Enter some value so it counts as a filled input
