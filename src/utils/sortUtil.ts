@@ -256,5 +256,7 @@ export const klinikenPaths = [
   "dct:creator",
   "dct:publisher",
   "healthdcatap:hdab",
+  "dcat:contactPoint",
+  "geodcatap:custodian",
   // TODO: add data holder path
 ]

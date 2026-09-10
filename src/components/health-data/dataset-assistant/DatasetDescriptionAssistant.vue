@@ -987,10 +987,14 @@ export default {
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:email'][0].value = klinik['EMail']
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:contactPage'][0].value = klinik['URL']
                             element.nestedValues['cv:contactPoint'][0].nestedValues['cv:telephone'][0].value = klinik['Telefon']
+                        } else if (element.nestedValues['vcard:hasEmail']) {
+                            element.nestedValues['vcard:hasEmail'][0].value = klinik['EMail']
+                            element.nestedValues['vcard:hasURL'][0].value = klinik['URL']
                         } else {
                             element.nestedValues['foaf:name'][0].value = klinik['Name']
                             element.nestedValues['foaf:homepage'][0].value = klinik['URL']
                             element.nestedValues['foaf:mbox'][0].value = klinik['EMail']
+                            element.nestedValues['dct:type'][0].value = 'https://hdeu-dcat.acceptance.data.health.europa.eu/resource/authority/publisher-type/inpatient-institute'
                         }
                     }
                 });
