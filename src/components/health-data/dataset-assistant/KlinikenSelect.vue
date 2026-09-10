@@ -72,7 +72,7 @@ governing permissions and limitations under the Licence.*/
 type Option = { value: string | number; label: string };
 
 export default {
-    name: 'KlinikenDropdownSelect',
+    name: 'KlinikenSelect',
     props: {
         id: { type: String, required: true },
         label: String,

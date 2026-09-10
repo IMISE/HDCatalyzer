@@ -35,11 +35,11 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseError(error.id)">
                         <div v-if="error.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                            }}:</strong> {{ error.test }}
+                                }}:</strong> {{ error.test }}
                         </div>
                         <div v-if="error.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                            }}:</strong>
+                                }}:</strong>
                             {{ error.location }}
                         </div>
                     </ErrorNotification>
@@ -50,12 +50,12 @@ governing permissions and limitations under the Licence.*/
                         @close="handleCloseWarning(warning.id)">
                         <div v-if="warning.test" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.test')
-                            }}:</strong> {{ warning.test
+                                }}:</strong> {{ warning.test
                                 }}
                         </div>
                         <div v-if="warning.location" class="ecl-notification__description">
                             <strong>{{ $t('message.datasetDescriptionAssistant.location')
-                            }}:</strong>
+                                }}:</strong>
                             {{ warning.location }}
                         </div>
                     </WarningNotification>
@@ -70,7 +70,7 @@ governing permissions and limitations under the Licence.*/
                 :key="`${idPrefix}-${prop.path}-${input._uid}-${selectedAccessLevel}`"
                 class="border rounded p-4 mb-4 position-relative">
                 <div class="d-flex align-items-center justify-content-end">
-                    <KlinikenDropdownSelect v-if="klinikenPaths.includes(prop.path)" id="kliniken-select" class="me-4"
+                    <KlinikenSelect v-if="klinikenPaths.includes(prop.path)" id="kliniken-select" class="me-4"
                         :items="kliniken" :model-value="selectedKlinik"
                         @update:model-value="(klinik: any) => selectKlinik(klinik, prop.path, input)" />
                     <button
@@ -156,13 +156,13 @@ import { getLocaleText } from '@/utils/generalUtils';
 import type { AccessLevel, AnyProperty, DataBucket, ITBValidationError, PropertyContext, ShapeInput } from './types';
 import TemplateDropdownSelect from './TemplateDropdownSelect.vue';
 import { orders, klinikenPaths } from '@/utils/sortUtil'
-import KlinikenDropdownSelect from './KlinikenDropdownSelect.vue';
+import KlinikenSelect from './KlinikenSelect.vue';
 import ErrorNotification from '../common/notifications/ErrorNotification.vue';
 import WarningNotification from '../common/notifications/WarningNotification.vue';
 
 export default {
     name: 'RecursiveForm',
-    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect, KlinikenDropdownSelect, ErrorNotification, WarningNotification },
+    components: { DynamicInputField, FauxLabel, TemplateDropdownSelect, KlinikenSelect, ErrorNotification, WarningNotification },
     props: {
         idPrefix: { type: String, required: true },
         properties: { type: Array as PropType<AnyProperty[]>, required: true },
