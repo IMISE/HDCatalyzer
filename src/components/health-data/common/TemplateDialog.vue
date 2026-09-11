@@ -31,14 +31,14 @@ governing permissions and limitations under the Licence.*/
                 <header class="ecl-modal__header">
                     <div class="ecl-modal__header-content" :id="'modal-example-header' + $.uid"
                         data-test-id="confirmation-dialog-header-title">
-                        {{ mode === "save" ? 'Enter template name' : 'Select template' }}
+                        {{ mode === "save" ? 'Name der Vorlage eingeben' : 'Vorlage auswählen' }}
                     </div>
                     <button class="ecl-button ecl-button--tertiary ecl-modal__close ecl-button--icon-only"
                         data-ecl-modal-close type="button">
                         <span class="ecl-button__container">
                             <span class="ecl-button__label" data-ecl-label="true">{{
                                 $t('message.metadata.close')
-                            }}
+                                }}
                             </span>
                             <svg class="ecl-icon ecl-icon--s ecl-icon--rotate-180 ecl-select__icon-shape"
                                 focusable="false" aria-hidden="true">
