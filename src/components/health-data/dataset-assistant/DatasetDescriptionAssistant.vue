@@ -860,7 +860,7 @@ export default {
 
             this.translateLoading = true;
             try {
-                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/ai/generate`, {
+                const response = await fetch(`${import.meta.env.VITE_DDA_PROXY_URL}/translate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
