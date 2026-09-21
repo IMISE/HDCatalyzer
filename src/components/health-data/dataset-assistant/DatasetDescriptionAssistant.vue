@@ -270,7 +270,7 @@ governing permissions and limitations under the Licence.*/
                             </ul>
 
                             <div class="border rounded mt-2 p-4">
-                                <label for="fileUpload" class="mb-4">Datensatz importieren</label>
+                                <label for="fileUpload" class="mb-4">Datensatzbeschreibung importieren</label>
                                 <input type="file" id="fileUpload" @change="handleFileUpload" />
                             </div>
                         </div>
