@@ -98,17 +98,18 @@ governing permissions and limitations under the Licence.*/
                 <!-- Leaf: render a single field -->
                 <DynamicInputField :translateLoading="translateLoading" v-if="!prop.nestedProperties?.length"
                     class="mb-3" :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
-                    :input="prop.input" :multilingual="isMultilingual(prop)"
-                    :readonly="!!prop.hasValue || prop.input.readonly" :required="isRequired(prop, parent, localBucket)"
-                    :date-range="getDateRange(prop, i)" v-model="localBucket[prop.path][i]"
-                    v-model:saved="localSaved" />
+                    :input="prop.input" :multilingual="isMultilingual(prop)" :path="prop.path"
+                    :datasetCategoriesMap="datasetCategoriesMap" :readonly="!!prop.hasValue || prop.input.readonly"
+                    :required="isRequired(prop, parent, localBucket)" :date-range="getDateRange(prop, i)"
+                    v-model="localBucket[prop.path][i]" v-model:saved="localSaved" />
 
                 <!-- Container node -->
                 <template v-else>
                     <!-- If the container accepts an IRI, render an input bound to the container's value -->
                     <DynamicInputField v-if="prop.input.type && isIri(prop)" class="mb-3"
                         :id="`${idPrefix}-${prop.path.replace(':', '-')}-${i}`" :datatype="prop.datatype"
-                        :input="prop.input" :multilingual="false" :readonly="!!prop.hasValue || prop.input.readonly"
+                        :path="prop.path" :datasetCategoriesMap="datasetCategoriesMap" :input="prop.input"
+                        :multilingual="false" :readonly="!!prop.hasValue || prop.input.readonly"
                         :required="isRequired(prop, parent, localBucket)" v-model="localBucket[prop.path][i]"
                         v-model:saved="localSaved" />
 
@@ -188,6 +189,7 @@ export default {
         handleCloseWarning: { type: Function },
         validationErrors: { default: [] },
         validationWarnings: { default: [] },
+        datasetCategoriesMap: { default: [] },
     },
     data() {
         return {

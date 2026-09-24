@@ -112,7 +112,8 @@ governing permissions and limitations under the Licence.*/
                                 @handle-klinik-select="handleKlinikSelect" v-model:translateLoading="translateLoading"
                                 :filterValidationMessages="filterValidationMessages"
                                 :handleCloseError="handleCloseError" :handleCloseWarning="handleCloseWarning"
-                                :validationErrors="validationErrors" :validationWarnings="validationWarnings" />
+                                :validationErrors="validationErrors" :validationWarnings="validationWarnings"
+                                :datasetCategoriesMap="datasetCategoriesMap" />
                         </template>
 
                         <!-- Multiple buckets into accordion for distribution/sample/analytics -->

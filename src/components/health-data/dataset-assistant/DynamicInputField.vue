@@ -54,10 +54,11 @@ governing permissions and limitations under the Licence.*/
         </div>
     </div>
     <FormTextInputField v-else :id="id" :label="getLocaleText(input.label)" :tooltip="getLocaleText(input.tooltip)"
-        :usage-note="getLocaleText(input.usageNote)" :placeholder="getLocaleText(input.placeholder)" :type="input.type"
-        :multilingual="multilingual" :display-limit="false" :error-fields="errorFields" :readonly="readonly"
-        :required="required" v-model="internalValue.value" v-model:language="internalValue.lang"
-        :translateLoading="translateLoading" @blur="updateErrorFields" />
+        :usage-note="getLocaleText(input.usageNote) + getCustomUsageNote()"
+        :placeholder="getLocaleText(input.placeholder)" :type="input.type" :multilingual="multilingual"
+        :display-limit="false" :error-fields="errorFields" :readonly="readonly" :required="required"
+        v-model="internalValue.value" v-model:language="internalValue.lang" :translateLoading="translateLoading"
+        @blur="updateErrorFields" />
 </template>
 
 <script lang="ts">
@@ -108,6 +109,8 @@ export default {
             default: null,
         },
         translateLoading: { type: Boolean },
+        path: { default: "" },
+        datasetCategoriesMap: { default: {} },
     },
     computed: {
         flatpickrConfig(): any {
@@ -143,6 +146,19 @@ export default {
         };
     },
     methods: {
+        getCustomUsageNote() {
+            const hasPath = Object.keys(this.datasetCategoriesMap).includes(this.path);
+
+            if (!hasPath) {
+                return;
+            }
+
+            if (this.datasetCategoriesMap[this.path].usage_note !== "") {
+                return `\n\n${this.datasetCategoriesMap[this.path].usage_note}`;
+            }
+
+            return;
+        },
         getLocaleText,
         ensureRequiredCheckboxValue() {
             if (this.input.type === 'checkbox' && this.required && !this.internalValue.value) {
