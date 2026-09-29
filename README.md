@@ -1,5 +1,7 @@
-# HDCatalizer
+# HDCatalyzer
 A tool for user-friendly creation of dataset metadata conforming to the HealthDCAT-AP standard.
+
+This is the repository of the frontend. The backend code can be found in the [HDCatalyzer-proxy](https://github.com/mstelbrink/hdcatalyzer-proxy) repository.
 
 ## Setup
 
