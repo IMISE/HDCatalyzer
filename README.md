@@ -26,6 +26,8 @@ WEBAPP_PORT=1234 # (optional, default = 80)
 docker compose up -d
 ```
 
+The app can be accessed at http://localhost (or http://localhost:[PORT] if the port was changed to something other than 80).
+
 #### docker
 
 ```sh
@@ -36,6 +38,8 @@ docker build --build-arg VITE_DDA_PROXY_URL=http://localhost:8080 -t hdcatalyzer
 docker run -p 1234:80 --name HDCatalyzer hdcatalyzer
 ```
 
+The app can be accessed at http://localhost (or http://localhost:[PORT] if the port was changed to something other than 80).
+
 ### Development
 
 ```sh
@@ -45,3 +49,5 @@ pnpm install
 ```sh
 pnpm run dev
 ```
+
+The app can be accessed at http://localhost:5173.
