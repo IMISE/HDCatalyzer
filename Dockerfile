@@ -1,21 +1,18 @@
-FROM httpd:2.4
+FROM nginx:alpine3.24 AS builder
 
 ARG VITE_DDA_PROXY_URL
 
 WORKDIR /app
 
-COPY . .
+RUN apk add pnpm
 
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install nodejs npm apache2 -y
+COPY . .
 
 RUN echo "VITE_DDA_PROXY_URL=$VITE_DDA_PROXY_URL" >> .env
 
-RUN npm install --ignore-scripts
-RUN npm run build-only
+RUN pnpm install
+RUN pnpm run build-only
 
-RUN sed -i 's/^#LoadModule rewrite_module modules\/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' /usr/local/apache2/conf/httpd.conf
-RUN sed -i '/<Directory "\/usr\/local\/apache2\/htdocs">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /usr/local/apache2/conf/httpd.conf
+FROM nginx:alpine3.24
 
-SHELL ["/bin/bash", "-c"]
-CMD cp -r dist/* /usr/local/apache2/htdocs && cp .htaccess /usr/local/apache2/htdocs && httpd-foreground
+COPY --from=builder /app/dist/ /usr/share/nginx/html
