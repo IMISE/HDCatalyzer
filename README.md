@@ -11,10 +11,10 @@ This is the repository of the frontend. The backend code can be found in the [HD
 git clone https://github.com/IMISE/HDCatalyzer.git
 ```
 
-2. Set environment variables
+2. Set the environment variables by running `cp .env.template .env` or manually by setting the following values:
 
 ```env
-VITE_DDA_PROXY_URL=http://localhost:8080/api
+VITE_DDA_PROXY_URL=http://localhost:8080
 WEBAPP_PORT=1234 # (optional, default = 80)
 ```
 
@@ -29,7 +29,7 @@ docker compose up -d
 #### docker
 
 ```sh
-docker build --build-arg VITE_DDA_PROXY_URL=http://localhost:8080/api -t hdcatalyzer .
+docker build --build-arg VITE_DDA_PROXY_URL=http://localhost:8080 -t hdcatalyzer .
 ```
 
 ```sh
