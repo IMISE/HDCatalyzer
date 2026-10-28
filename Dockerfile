@@ -1,4 +1,4 @@
-FROM nginx:alpine3.24 AS builder
+FROM nginx:alpine3.24-slim AS builder
 
 ARG VITE_DDA_PROXY_URL
 
